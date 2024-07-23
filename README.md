@@ -30,6 +30,29 @@ The application will include the following endpoints, secured with JWT tokens vi
 - **Medical Record Entity Endpoints**
 - **Dashboard Endpoint**
 
+## Project Structure
+
+Below is the structure of the Labmedical project:
+src/
+└── main/
+├── java/
+│   └── com/
+│       └── labmedical/
+│           ├── SeuProjetoApplication.java
+│           ├── config/
+│           ├── controllers/
+│           ├── dtos/
+│           ├── models/
+│           ├── exceptions/
+│           ├── repositories/
+│           ├── security/
+│           ├── services/
+└── resources/
+├── application.properties
+└── templates/
+└── error.html
+
+
 ## Development Setup
 
 ### Prerequisites
