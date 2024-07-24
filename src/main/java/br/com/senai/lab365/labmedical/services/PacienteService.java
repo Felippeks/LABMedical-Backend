@@ -76,11 +76,15 @@ public class PacienteService {
 
     @Transactional
     public void excluirPaciente(Long id) {
+        if (!pacienteRepository.existsById(id)) {
+            throw new PacienteNaoEncontradoException("Paciente não encontrado para o ID: " + id);
+        }
         pacienteRepository.deleteById(id);
     }
 
     public Optional<PacienteEntity> buscarPacientePorId(Long id) {
-        return pacienteRepository.findById(id);
+        return Optional.ofNullable(pacienteRepository.findById(id)
+                .orElseThrow(() -> new PacienteNaoEncontradoException("Paciente não encontrado para o ID: " + id)));
     }
 
     public Page<PacienteEntity> listarPacientes(String nome, String telefone, String email, Pageable pageable) {

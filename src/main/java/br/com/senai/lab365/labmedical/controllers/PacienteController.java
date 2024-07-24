@@ -1,8 +1,6 @@
 package br.com.senai.lab365.labmedical.controllers;
 
 import br.com.senai.lab365.labmedical.entities.PacienteEntity;
-import br.com.senai.lab365.labmedical.exceptions.paciente.CpfJaCadastradoException;
-import br.com.senai.lab365.labmedical.exceptions.paciente.PacienteNaoEncontradoException;
 import br.com.senai.lab365.labmedical.services.PacienteService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
