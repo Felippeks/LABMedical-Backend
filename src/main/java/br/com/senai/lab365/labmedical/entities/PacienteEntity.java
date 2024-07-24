@@ -17,52 +17,63 @@ public class PacienteEntity {
 
     @NotBlank
     @Size(min = 8, max = 64)
+    @Column(name = "nome_completo", length = 64, nullable = false)
     @Schema(description = "Nome completo do paciente", example = "João da Silva")
     private String nomeCompleto;
 
     @NotBlank
+    @Column(nullable = false, length = 20)
     @Schema(description = "Gênero do paciente", example = "Masculino")
     private String genero;
 
     @NotNull
+    @Column(name = "data_nascimento", nullable = false)
     @Schema(description = "Data de nascimento do paciente", example = "2000-01-01")
     private LocalDate dataNascimento;
 
     @NotBlank
     @Pattern(regexp = "\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2}")
+    @Column(nullable = false, length = 14)
     @Schema(description = "CPF do paciente", example = "123.456.789-00")
     private String cpf;
 
     @NotBlank
     @Size(max = 20)
+    @Column(nullable = false, length = 20)
     @Schema(description = "RG do paciente", example = "123456789")
     private String rg;
 
     @NotBlank
     @Size(max = 20)
+    @Column(name = "orgao_expedidor_rg", nullable = false, length = 20)
     @Schema(description = "Órgão expedidor do RG do paciente", example = "SSP-SP")
     private String orgaoExpedidorRg;
 
     @NotBlank
+    @Column(name = "estado_civil", nullable = false, length = 20)
     @Schema(description = "Estado civil do paciente", example = "Solteiro")
     private String estadoCivil;
 
     @NotBlank
     @Pattern(regexp = "\\(\\d{2}\\) \\d \\d{4}-\\d{4}")
+    @Column(nullable = false, length = 20)
     @Schema(description = "Telefone do paciente", example = "(11) 9 1234-5678")
     private String telefone;
 
     @Email
+    @Column(length = 64)
     @Schema(description = "E-mail do paciente", example = "email@email.com")
     private String email;
 
     @NotBlank
+    @Column(nullable = false, length = 64)
     @Size(min = 8, max = 64)
     @Schema(description = "Naturalidade do paciente", example = "São Paulo")
     private String naturalidade;
 
     @NotBlank
     @Pattern(regexp = "\\(\\d{2}\\) \\d \\d{4}-\\d{4}")
+    @Column(name = "contato_emergencia", nullable = false, length = 20)
     @Schema(description = "Contato de emergência do paciente", example = "(11) 9 1234-5678")
     private String contatoEmergencia;
 
