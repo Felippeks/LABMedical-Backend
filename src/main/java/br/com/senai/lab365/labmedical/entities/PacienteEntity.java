@@ -1,5 +1,6 @@
 package br.com.senai.lab365.labmedical.entities;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import java.time.LocalDate;
@@ -7,62 +8,82 @@ import java.util.List;
 
 @Entity
 @Table(name = "pacientes")
+@Schema(description = "Representa um paciente no sistema")
 public class PacienteEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Schema(description = "Identificador único do paciente", example = "1")
     private Long id;
 
     @NotBlank
     @Size(min = 8, max = 64)
+    @Schema(description = "Nome completo do paciente", example = "João da Silva")
     private String nomeCompleto;
 
     @NotBlank
+    @Schema(description = "Gênero do paciente", example = "Masculino")
     private String genero;
 
     @NotNull
+    @Schema(description = "Data de nascimento do paciente", example = "2000-01-01")
     private LocalDate dataNascimento;
 
     @NotBlank
     @Pattern(regexp = "\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2}")
+    @Schema(description = "CPF do paciente", example = "123.456.789-00")
     private String cpf;
 
     @NotBlank
     @Size(max = 20)
+    @Schema(description = "RG do paciente", example = "123456789")
     private String rg;
 
     @NotBlank
     @Size(max = 20)
+    @Schema(description = "Órgão expedidor do RG do paciente", example = "SSP-SP")
     private String orgaoExpedidorRg;
 
     @NotBlank
+    @Schema(description = "Estado civil do paciente", example = "Solteiro")
     private String estadoCivil;
 
     @NotBlank
     @Pattern(regexp = "\\(\\d{2}\\) \\d \\d{4}-\\d{4}")
+    @Schema(description = "Telefone do paciente", example = "(11) 9 1234-5678")
     private String telefone;
 
     @Email
+    @Schema(description = "E-mail do paciente", example = "email@email.com")
     private String email;
 
     @NotBlank
     @Size(min = 8, max = 64)
+    @Schema(description = "Naturalidade do paciente", example = "São Paulo")
     private String naturalidade;
 
     @NotBlank
     @Pattern(regexp = "\\(\\d{2}\\) \\d \\d{4}-\\d{4}")
+    @Schema(description = "Contato de emergência do paciente", example = "(11) 9 1234-5678")
     private String contatoEmergencia;
 
     @ElementCollection
+    @Schema(description = "Lista de alergias do paciente", example = "[\"Alergia 1\", \"Alergia 2\"]")
     private List<String> listaAlergias;
 
     @ElementCollection
+    @Schema(description = "Lista de cuidados específicos do paciente", example = "[\"Cuidado 1\", \"Cuidado 2\"]")
     private List<String> listaCuidadosEspecificos;
 
+    @Schema(description = "Convênio do paciente", example = "Unimed")
     private String convenio;
+
+    @Schema(description = "Número do convênio do paciente", example = "123456")
     private String numeroConvenio;
 
+    @Schema(description = "Validade do convênio do paciente", example = "2022-01-01")
     private LocalDate validadeConvenio;
 
+    @Schema(description = "Endereço do paciente")
     @Embedded
     private Endereco endereco;
 
