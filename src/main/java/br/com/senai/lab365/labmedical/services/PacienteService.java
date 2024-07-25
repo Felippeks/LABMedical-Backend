@@ -1,5 +1,9 @@
 package br.com.senai.lab365.labmedical.services;
 
+import br.com.senai.lab365.labmedical.dtos.paciente.EnderecoDTO;
+import br.com.senai.lab365.labmedical.dtos.paciente.PacienteRequestDTO;
+import br.com.senai.lab365.labmedical.dtos.paciente.PacienteResponseDTO;
+import br.com.senai.lab365.labmedical.entities.Endereco;
 import br.com.senai.lab365.labmedical.entities.PacienteEntity;
 import br.com.senai.lab365.labmedical.exceptions.paciente.CpfJaCadastradoException;
 import br.com.senai.lab365.labmedical.exceptions.paciente.PacienteNaoEncontradoException;
@@ -28,19 +32,23 @@ public class PacienteService {
     }
 
     @Transactional
-    public PacienteEntity criarPaciente(PacienteEntity pacienteEntity) {
+    public PacienteResponseDTO criarPaciente(PacienteRequestDTO pacienteRequestDTO) {
+        PacienteEntity pacienteEntity = convertToEntity(pacienteRequestDTO);
         validarCamposObrigatorios(pacienteEntity);
         verificarCpfDuplicado(pacienteEntity.getCpf());
-        return pacienteRepository.save(pacienteEntity);
+        PacienteEntity savedEntity = pacienteRepository.save(pacienteEntity);
+        return convertToResponseDTO(savedEntity);
     }
 
     @Transactional
-    public List<PacienteEntity> criarPacientesEmLote(List<PacienteEntity> pacientes) {
-        List<PacienteEntity> pacientesCriados = new ArrayList<>();
-        for (PacienteEntity paciente : pacientes) {
-            validarCamposObrigatorios(paciente);
-            verificarCpfDuplicado(paciente.getCpf());
-            pacientesCriados.add(pacienteRepository.save(paciente));
+    public List<PacienteResponseDTO> criarPacientesEmLote(List<PacienteRequestDTO> pacientes) {
+        List<PacienteResponseDTO> pacientesCriados = new ArrayList<>();
+        for (PacienteRequestDTO pacienteRequestDTO : pacientes) {
+            PacienteEntity pacienteEntity = convertToEntity(pacienteRequestDTO);
+            validarCamposObrigatorios(pacienteEntity);
+            verificarCpfDuplicado(pacienteEntity.getCpf());
+            PacienteEntity savedEntity = pacienteRepository.save(pacienteEntity);
+            pacientesCriados.add(convertToResponseDTO(savedEntity));
         }
         return pacientesCriados;
     }
@@ -67,27 +75,12 @@ public class PacienteService {
     }
 
     @Transactional
-    public PacienteEntity atualizarPaciente(Long id, PacienteEntity pacienteAtualizado) {
+    public PacienteResponseDTO atualizarPaciente(Long id, PacienteRequestDTO pacienteAtualizado) {
         PacienteEntity paciente = pacienteRepository.findById(id)
                 .orElseThrow(() -> new PacienteNaoEncontradoException("Paciente não encontrado"));
-        paciente.setNomeCompleto(pacienteAtualizado.getNomeCompleto());
-        paciente.setGenero(pacienteAtualizado.getGenero());
-        paciente.setDataNascimento(pacienteAtualizado.getDataNascimento());
-        paciente.setRg(pacienteAtualizado.getRg());
-        paciente.setOrgaoExpedidorRg(pacienteAtualizado.getOrgaoExpedidorRg());
-        paciente.setEstadoCivil(pacienteAtualizado.getEstadoCivil());
-        paciente.setTelefone(pacienteAtualizado.getTelefone());
-        paciente.setEmail(pacienteAtualizado.getEmail());
-        paciente.setNaturalidade(pacienteAtualizado.getNaturalidade());
-        paciente.setContatoEmergencia(pacienteAtualizado.getContatoEmergencia());
-        paciente.setListaAlergias(pacienteAtualizado.getListaAlergias());
-        paciente.setListaCuidadosEspecificos(pacienteAtualizado.getListaCuidadosEspecificos());
-        paciente.setConvenio(pacienteAtualizado.getConvenio());
-        paciente.setNumeroConvenio(pacienteAtualizado.getNumeroConvenio());
-        paciente.setValidadeConvenio(pacienteAtualizado.getValidadeConvenio());
-        paciente.setEndereco(pacienteAtualizado.getEndereco());
-
-        return pacienteRepository.save(paciente);
+        updateEntityFromDTO(paciente, pacienteAtualizado);
+        PacienteEntity updatedEntity = pacienteRepository.save(paciente);
+        return convertToResponseDTO(updatedEntity);
     }
 
     @Transactional
@@ -99,12 +92,12 @@ public class PacienteService {
         return true;
     }
 
-    public Optional<PacienteEntity> buscarPacientePorId(Long id) {
-        return Optional.ofNullable(pacienteRepository.findById(id)
-                .orElseThrow(() -> new PacienteNaoEncontradoException("Paciente não encontrado para o ID: " + id)));
+    public Optional<PacienteResponseDTO> buscarPacientePorId(Long id) {
+        return pacienteRepository.findById(id)
+                .map(this::convertToResponseDTO);
     }
 
-    public Page<PacienteEntity> listarPacientes(String nome, String telefone, String email, Pageable pageable) {
+    public Page<PacienteResponseDTO> listarPacientes(String nome, String telefone, String email, Pageable pageable) {
         Specification<PacienteEntity> spec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
 
@@ -121,6 +114,103 @@ public class PacienteService {
             return cb.and(predicates.toArray(new Predicate[0]));
         };
 
-        return pacienteRepository.findAll(spec, pageable);
+        return pacienteRepository.findAll(spec, pageable).map(this::convertToResponseDTO);
+    }
+
+    private PacienteEntity convertToEntity(PacienteRequestDTO dto) {
+        PacienteEntity entity = new PacienteEntity();
+        entity.setNomeCompleto(dto.getNomeCompleto());
+        entity.setGenero(dto.getGenero());
+        entity.setDataNascimento(dto.getDataNascimento());
+        entity.setCpf(dto.getCpf());
+        entity.setRg(dto.getRg());
+        entity.setOrgaoExpedidorRg(dto.getOrgaoExpedidorRg());
+        entity.setEstadoCivil(dto.getEstadoCivil());
+        entity.setTelefone(dto.getTelefone());
+        entity.setEmail(dto.getEmail());
+        entity.setNaturalidade(dto.getNaturalidade());
+        entity.setContatoEmergencia(dto.getContatoEmergencia());
+        entity.setListaAlergias(dto.getListaAlergias());
+        entity.setListaCuidadosEspecificos(dto.getListaCuidadosEspecificos());
+        entity.setConvenio(dto.getConvenio());
+        entity.setNumeroConvenio(dto.getNumeroConvenio());
+        entity.setValidadeConvenio(dto.getValidadeConvenio());
+        entity.setEndereco(convertToEntity(dto.getEndereco()));
+        return entity;
+    }
+
+    private PacienteResponseDTO convertToResponseDTO(PacienteEntity entity) {
+        PacienteResponseDTO dto = new PacienteResponseDTO();
+        dto.setId(entity.getId());
+        dto.setNomeCompleto(entity.getNomeCompleto());
+        dto.setGenero(entity.getGenero());
+        dto.setDataNascimento(entity.getDataNascimento());
+        dto.setCpf(entity.getCpf());
+        dto.setRg(entity.getRg());
+        dto.setOrgaoExpedidorRg(entity.getOrgaoExpedidorRg());
+        dto.setEstadoCivil(entity.getEstadoCivil());
+        dto.setTelefone(entity.getTelefone());
+        dto.setEmail(entity.getEmail());
+        dto.setNaturalidade(entity.getNaturalidade());
+        dto.setContatoEmergencia(entity.getContatoEmergencia());
+        dto.setListaAlergias(entity.getListaAlergias());
+        dto.setListaCuidadosEspecificos(entity.getListaCuidadosEspecificos());
+        dto.setConvenio(entity.getConvenio());
+        dto.setNumeroConvenio(entity.getNumeroConvenio());
+        dto.setValidadeConvenio(entity.getValidadeConvenio());
+        dto.setEndereco(convertToDTO(entity.getEndereco()));
+        return dto;
+    }
+
+    private void updateEntityFromDTO(PacienteEntity entity, PacienteRequestDTO dto) {
+        entity.setNomeCompleto(dto.getNomeCompleto());
+        entity.setGenero(dto.getGenero());
+        entity.setDataNascimento(dto.getDataNascimento());
+        entity.setCpf(dto.getCpf());
+        entity.setRg(dto.getRg());
+        entity.setOrgaoExpedidorRg(dto.getOrgaoExpedidorRg());
+        entity.setEstadoCivil(dto.getEstadoCivil());
+        entity.setTelefone(dto.getTelefone());
+        entity.setEmail(dto.getEmail());
+        entity.setNaturalidade(dto.getNaturalidade());
+        entity.setContatoEmergencia(dto.getContatoEmergencia());
+        entity.setListaAlergias(dto.getListaAlergias());
+        entity.setListaCuidadosEspecificos(dto.getListaCuidadosEspecificos());
+        entity.setConvenio(dto.getConvenio());
+        entity.setNumeroConvenio(dto.getNumeroConvenio());
+        entity.setValidadeConvenio(dto.getValidadeConvenio());
+        entity.setEndereco(convertToEntity(dto.getEndereco()));
+    }
+
+    private Endereco convertToEntity(EnderecoDTO dto) {
+        if (dto == null) {
+            return null;
+        }
+        Endereco entity = new Endereco();
+        entity.setCep(dto.getCep());
+        entity.setCidade(dto.getCidade());
+        entity.setEstado(dto.getEstado());
+        entity.setLogradouro(dto.getLogradouro());
+        entity.setNumero(dto.getNumero());
+        entity.setComplemento(dto.getComplemento());
+        entity.setBairro(dto.getBairro());
+        entity.setPontoDeReferencia(dto.getPontoDeReferencia());
+        return entity;
+    }
+
+    private EnderecoDTO convertToDTO(Endereco entity) {
+        if (entity == null) {
+            return null;
+        }
+        EnderecoDTO dto = new EnderecoDTO();
+        dto.setCep(entity.getCep());
+        dto.setCidade(entity.getCidade());
+        dto.setEstado(entity.getEstado());
+        dto.setLogradouro(entity.getLogradouro());
+        dto.setNumero(entity.getNumero());
+        dto.setComplemento(entity.getComplemento());
+        dto.setBairro(entity.getBairro());
+        dto.setPontoDeReferencia(entity.getPontoDeReferencia());
+        return dto;
     }
 }

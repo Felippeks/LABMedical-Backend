@@ -1,6 +1,7 @@
 package br.com.senai.lab365.labmedical.controllers;
 
-import br.com.senai.lab365.labmedical.entities.PacienteEntity;
+import br.com.senai.lab365.labmedical.dtos.paciente.PacienteRequestDTO;
+import br.com.senai.lab365.labmedical.dtos.paciente.PacienteResponseDTO;
 import br.com.senai.lab365.labmedical.services.PacienteService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -32,16 +33,16 @@ public class PacienteController {
     @Operation(summary = "Cria um ou mais pacientes", responses = {
             @ApiResponse(responseCode = "201", description = "Paciente(s) criado(s) com sucesso",
                     content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = PacienteEntity.class))),
+                            schema = @Schema(implementation = PacienteResponseDTO.class))),
             @ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos")})
     public ResponseEntity<?> criarPaciente(@RequestBody Object payload) {
         if (payload instanceof List) {
-            List<PacienteEntity> pacientes = objectMapper.convertValue(payload, new TypeReference<List<PacienteEntity>>() {});
-            List<PacienteEntity> pacientesCriados = pacienteService.criarPacientesEmLote(pacientes);
+            List<PacienteRequestDTO> pacientes = objectMapper.convertValue(payload, new TypeReference<List<PacienteRequestDTO>>() {});
+            List<PacienteResponseDTO> pacientesCriados = pacienteService.criarPacientesEmLote(pacientes);
             return ResponseEntity.status(201).body(pacientesCriados);
         } else {
-            PacienteEntity paciente = objectMapper.convertValue(payload, PacienteEntity.class);
-            PacienteEntity pacienteCriado = pacienteService.criarPaciente(paciente);
+            PacienteRequestDTO paciente = objectMapper.convertValue(payload, PacienteRequestDTO.class);
+            PacienteResponseDTO pacienteCriado = pacienteService.criarPaciente(paciente);
             return ResponseEntity.status(201).body(pacienteCriado);
         }
     }
@@ -51,12 +52,12 @@ public class PacienteController {
             @ApiResponse(responseCode = "200", description = "Lista de pacientes recuperada com sucesso",
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = Page.class)))})
-    public ResponseEntity<Page<PacienteEntity>> listarPacientes(
+    public ResponseEntity<Page<PacienteResponseDTO>> listarPacientes(
             @RequestParam(required = false) String nome,
             @RequestParam(required = false) String telefone,
             @RequestParam(required = false) String email,
             Pageable pageable) {
-        Page<PacienteEntity> pacientes = pacienteService.listarPacientes(nome, telefone, email, pageable);
+        Page<PacienteResponseDTO> pacientes = pacienteService.listarPacientes(nome, telefone, email, pageable);
         return ResponseEntity.ok(pacientes);
     }
 
@@ -64,11 +65,11 @@ public class PacienteController {
     @Operation(summary = "Atualiza um paciente existente", responses = {
             @ApiResponse(responseCode = "200", description = "Paciente atualizado com sucesso",
                     content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = PacienteEntity.class))),
+                            schema = @Schema(implementation = PacienteResponseDTO.class))),
             @ApiResponse(responseCode = "404", description = "Paciente não encontrado"),
             @ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos")})
-    public ResponseEntity<PacienteEntity> atualizarPaciente(@PathVariable Long id, @RequestBody PacienteEntity pacienteAtualizado) {
-        PacienteEntity paciente = pacienteService.atualizarPaciente(id, pacienteAtualizado);
+    public ResponseEntity<PacienteResponseDTO> atualizarPaciente(@PathVariable Long id, @RequestBody PacienteRequestDTO pacienteAtualizado) {
+        PacienteResponseDTO paciente = pacienteService.atualizarPaciente(id, pacienteAtualizado);
         return ResponseEntity.ok(paciente);
     }
 
@@ -89,10 +90,10 @@ public class PacienteController {
     @Operation(summary = "Busca um paciente por ID", responses = {
             @ApiResponse(responseCode = "200", description = "Paciente encontrado",
                     content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = PacienteEntity.class))),
+                            schema = @Schema(implementation = PacienteResponseDTO.class))),
             @ApiResponse(responseCode = "404", description = "Paciente não encontrado")})
-    public ResponseEntity<PacienteEntity> buscarPacientePorId(@PathVariable Long id) {
-        Optional<PacienteEntity> paciente = pacienteService.buscarPacientePorId(id);
+    public ResponseEntity<PacienteResponseDTO> buscarPacientePorId(@PathVariable Long id) {
+        Optional<PacienteResponseDTO> paciente = pacienteService.buscarPacientePorId(id);
         return paciente.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 }

@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -97,6 +98,10 @@ public class PacienteEntity {
     @Schema(description = "Endereço do paciente")
     @Embedded
     private Endereco endereco;
+
+    @OneToMany(mappedBy = "paciente", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @Schema(description = "Lista de consultas do paciente")
+    private List<ConsultaEntity> consultas = new ArrayList<>();
 
     public Long getId() {
         return id;
@@ -242,28 +247,14 @@ public class PacienteEntity {
         this.endereco = endereco;
     }
 
-
-    public PacienteEntity() {
+    public List<ConsultaEntity> getConsultas() {
+        return consultas;
     }
 
-    public PacienteEntity(Long id, String nomeCompleto, String genero, LocalDate dataNascimento, String cpf, String rg, String orgaoExpedidorRg, String estadoCivil, String telefone, String email, String naturalidade, String contatoEmergencia, List<String> listaAlergias, List<String> listaCuidadosEspecificos, String convenio, String numeroConvenio, LocalDate validadeConvenio, Endereco endereco) {
-        this.id = id;
-        this.nomeCompleto = nomeCompleto;
-        this.genero = genero;
-        this.dataNascimento = dataNascimento;
-        this.cpf = cpf;
-        this.rg = rg;
-        this.orgaoExpedidorRg = orgaoExpedidorRg;
-        this.estadoCivil = estadoCivil;
-        this.telefone = telefone;
-        this.email = email;
-        this.naturalidade = naturalidade;
-        this.contatoEmergencia = contatoEmergencia;
-        this.listaAlergias = listaAlergias;
-        this.listaCuidadosEspecificos = listaCuidadosEspecificos;
-        this.convenio = convenio;
-        this.numeroConvenio = numeroConvenio;
-        this.validadeConvenio = validadeConvenio;
-        this.endereco = endereco;
+    public void setConsultas(List<ConsultaEntity> consultas) {
+        this.consultas = consultas;
+    }
+
+    public PacienteEntity() {
     }
 }
