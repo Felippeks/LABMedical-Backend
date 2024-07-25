@@ -1,0 +1,98 @@
+package br.com.senai.lab365.labmedical.controllers;
+
+import br.com.senai.lab365.labmedical.entities.PacienteEntity;
+import br.com.senai.lab365.labmedical.services.PacienteService;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.data.domain.Pageable;
+import java.util.List;
+import java.util.Optional;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@RestController
+@RequestMapping("/api/pacientes")
+public class PacienteController {
+    private final PacienteService pacienteService;
+    private final ObjectMapper objectMapper;
+
+    @Autowired
+    public PacienteController(PacienteService pacienteService, ObjectMapper objectMapper) {
+        this.pacienteService = pacienteService;
+        this.objectMapper = objectMapper;
+    }
+
+    @PostMapping
+    @Operation(summary = "Cria um ou mais pacientes", responses = {
+            @ApiResponse(responseCode = "201", description = "Paciente(s) criado(s) com sucesso",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = PacienteEntity.class))),
+            @ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos")})
+    public ResponseEntity<?> criarPaciente(@RequestBody Object payload) {
+        if (payload instanceof List) {
+            List<PacienteEntity> pacientes = objectMapper.convertValue(payload, new TypeReference<List<PacienteEntity>>() {});
+            List<PacienteEntity> pacientesCriados = pacienteService.criarPacientesEmLote(pacientes);
+            return ResponseEntity.status(201).body(pacientesCriados);
+        } else {
+            PacienteEntity paciente = objectMapper.convertValue(payload, PacienteEntity.class);
+            PacienteEntity pacienteCriado = pacienteService.criarPaciente(paciente);
+            return ResponseEntity.status(201).body(pacienteCriado);
+        }
+    }
+
+    @GetMapping
+    @Operation(summary = "Lista pacientes com filtros opcionais", responses = {
+            @ApiResponse(responseCode = "200", description = "Lista de pacientes recuperada com sucesso",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = Page.class)))})
+    public ResponseEntity<Page<PacienteEntity>> listarPacientes(
+            @RequestParam(required = false) String nome,
+            @RequestParam(required = false) String telefone,
+            @RequestParam(required = false) String email,
+            Pageable pageable) {
+        Page<PacienteEntity> pacientes = pacienteService.listarPacientes(nome, telefone, email, pageable);
+        return ResponseEntity.ok(pacientes);
+    }
+
+    @PutMapping("/{id}")
+    @Operation(summary = "Atualiza um paciente existente", responses = {
+            @ApiResponse(responseCode = "200", description = "Paciente atualizado com sucesso",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = PacienteEntity.class))),
+            @ApiResponse(responseCode = "404", description = "Paciente não encontrado"),
+            @ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos")})
+    public ResponseEntity<PacienteEntity> atualizarPaciente(@PathVariable Long id, @RequestBody PacienteEntity pacienteAtualizado) {
+        PacienteEntity paciente = pacienteService.atualizarPaciente(id, pacienteAtualizado);
+        return ResponseEntity.ok(paciente);
+    }
+
+    @DeleteMapping("/{id}")
+    @Operation(summary = "Exclui um paciente", responses = {
+            @ApiResponse(responseCode = "204", description = "Paciente excluído com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Paciente não encontrado")})
+    public ResponseEntity<String> excluirPaciente(@PathVariable Long id) {
+        boolean excluido = pacienteService.excluirPaciente(id);
+        if (excluido) {
+            return ResponseEntity.ok("Paciente excluído com sucesso");
+        } else {
+            return ResponseEntity.status(404).body("Paciente não encontrado");
+        }
+    }
+
+    @GetMapping("/{id}")
+    @Operation(summary = "Busca um paciente por ID", responses = {
+            @ApiResponse(responseCode = "200", description = "Paciente encontrado",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = PacienteEntity.class))),
+            @ApiResponse(responseCode = "404", description = "Paciente não encontrado")})
+    public ResponseEntity<PacienteEntity> buscarPacientePorId(@PathVariable Long id) {
+        Optional<PacienteEntity> paciente = pacienteService.buscarPacientePorId(id);
+        return paciente.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+}
