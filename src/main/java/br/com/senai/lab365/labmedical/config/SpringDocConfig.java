@@ -21,4 +21,12 @@ public class SpringDocConfig {
                 .pathsToMatch("/api/consultas/**")
                 .build();
     }
+
+    @Bean
+    public GroupedOpenApi exameApi() {
+        return GroupedOpenApi.builder()
+                .group("exames")
+                .pathsToMatch("/api/exames/**")
+                .build();
+    }
 }
