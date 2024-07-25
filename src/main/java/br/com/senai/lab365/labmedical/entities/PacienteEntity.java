@@ -100,6 +100,10 @@ public class PacienteEntity {
     private Endereco endereco;
 
     @OneToMany(mappedBy = "paciente", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @Schema(description = "Lista de exames do paciente")
+    private List<ExameEntity> exames = new ArrayList<>();
+
+    @OneToMany(mappedBy = "paciente", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @Schema(description = "Lista de consultas do paciente")
     private List<ConsultaEntity> consultas = new ArrayList<>();
 
@@ -253,6 +257,14 @@ public class PacienteEntity {
 
     public void setConsultas(List<ConsultaEntity> consultas) {
         this.consultas = consultas;
+    }
+
+    public List<ExameEntity> getExames() {
+        return exames;
+    }
+
+    public void setExames(List<ExameEntity> exames) {
+        this.exames = exames;
     }
 
     public PacienteEntity() {
