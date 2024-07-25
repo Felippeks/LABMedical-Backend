@@ -29,7 +29,23 @@ public class PacienteService {
 
     @Transactional
     public PacienteEntity criarPaciente(PacienteEntity pacienteEntity) {
+        validarCamposObrigatorios(pacienteEntity);
+        verificarCpfDuplicado(pacienteEntity.getCpf());
+        return pacienteRepository.save(pacienteEntity);
+    }
 
+    @Transactional
+    public List<PacienteEntity> criarPacientesEmLote(List<PacienteEntity> pacientes) {
+        List<PacienteEntity> pacientesCriados = new ArrayList<>();
+        for (PacienteEntity paciente : pacientes) {
+            validarCamposObrigatorios(paciente);
+            verificarCpfDuplicado(paciente.getCpf());
+            pacientesCriados.add(pacienteRepository.save(paciente));
+        }
+        return pacientesCriados;
+    }
+
+    private void validarCamposObrigatorios(PacienteEntity pacienteEntity) {
         validarCampoObrigatorio(pacienteEntity.getNomeCompleto(), "nomeCompleto");
         validarCampoObrigatorio(pacienteEntity.getGenero(), "genero");
         validarCampoObrigatorio(pacienteEntity.getDataNascimento(), "dataNascimento");
@@ -41,13 +57,13 @@ public class PacienteService {
         validarCampoObrigatorio(pacienteEntity.getEmail(), "email");
         validarCampoObrigatorio(pacienteEntity.getNaturalidade(), "naturalidade");
         validarCampoObrigatorio(pacienteEntity.getContatoEmergencia(), "contatoEmergencia");
+    }
 
-        pacienteRepository.findByCpf(pacienteEntity.getCpf())
+    private void verificarCpfDuplicado(String cpf) {
+        pacienteRepository.findByCpf(cpf)
                 .ifPresent(p -> {
                     throw new CpfJaCadastradoException("CPF já cadastrado");
                 });
-
-        return pacienteRepository.save(pacienteEntity);
     }
 
     @Transactional
@@ -75,11 +91,12 @@ public class PacienteService {
     }
 
     @Transactional
-    public void excluirPaciente(Long id) {
+    public boolean excluirPaciente(Long id) {
         if (!pacienteRepository.existsById(id)) {
             throw new PacienteNaoEncontradoException("Paciente não encontrado para o ID: " + id);
         }
         pacienteRepository.deleteById(id);
+        return true;
     }
 
     public Optional<PacienteEntity> buscarPacientePorId(Long id) {

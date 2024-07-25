@@ -33,24 +33,56 @@ The application will include the following endpoints, secured with JWT tokens vi
 ## Project Structure
 
 Below is the structure of the Labmedical project:
-src/
-└── main/
-├── java/
-│   └── com/
-│       └── labmedical/
-│           ├── SeuProjetoApplication.java
-│           ├── config/
-│           ├── controllers/
-│           ├── dtos/
-│           ├── models/
-│           ├── exceptions/
-│           ├── repositories/
-│           ├── security/
-│           ├── services/
-└── resources/
-├── application.properties
-└── templates/
-└── error.html
+
+```
++---src
+|   +---main
+|   |   +---java
+|   |   |   \---br
+|   |   |       \---com
+|   |   |           \---senai
+|   |   |               \---lab365
+|   |   |                   \---labmedical
+|   |   |                       |   LabmedicalApplication.java
+|   |   |                       |
+|   |   |                       +---config
+|   |   |                       |       SecurityConfig.java
+|   |   |                       |       SpringDocConfig.java
+|   |   |                       |
+|   |   |                       +---controllers
+|   |   |                       |       PacienteController.java
+|   |   |                       |       
+|   |   |                       +---dtos
+|   |   |                       |   \---paciente
+|   |   |                       |           EnderecoDTO.java
+|   |   |                       |           PacienteRequestDTO.java
+|   |   |                       |           PacienteResponseDTO.java
+|   |   |                       |
+|   |   |                       +---entities
+|   |   |                       |       Endereco.java
+|   |   |                       |       PacienteEntity.java
+|   |   |                       |
+|   |   |                       +---exceptions
+|   |   |                       |   |   GlobalExceptionHandler.java
+|   |   |                       |   |
+|   |   |                       |   +---consulta
+|   |   |                       |   \---paciente
+|   |   |                       |           CampoObrigatorioException.java
+|   |   |                       |           CpfJaCadastradoException.java
+|   |   |                       |           PacienteNaoEncontradoException.java
+|   |   |                       |
+|   |   |                       +---repositories
+|   |   |                       |       PacienteRepository.java
+|   |   |                       |
+|   |   |                       +---services
+|   |   |                       |       PacienteService.java
+|   |   |                       |
+|   |   |                       \---util
+|   |   |                               ValidarCampoObrigatorio.java
+|   |   |
+|   |   \---resources
+|   |       |   application.properties
+```
 
 
 ## Development Setup
