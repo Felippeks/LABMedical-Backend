@@ -1,5 +1,8 @@
 package br.com.senai.lab365.labmedical.dtos.paciente;
 
+import br.com.senai.lab365.labmedical.dtos.consultas.ConsultaResponseDTO;
+import br.com.senai.lab365.labmedical.dtos.exames.ExameResponseDTO;
+
 import java.time.LocalDate;
 import java.util.List;
 
@@ -22,6 +25,24 @@ public class PacienteResponseDTO {
     private String numeroConvenio;
     private LocalDate validadeConvenio;
     private EnderecoDTO endereco;
+    private List<ExameResponseDTO> listaExames;
+    private List<ConsultaResponseDTO> listaConsultas;
+
+    public List<ExameResponseDTO> getListaExames() {
+        return listaExames;
+    }
+
+    public void setListaExames(List<ExameResponseDTO> listaExames) {
+        this.listaExames = listaExames;
+    }
+
+    public List<ConsultaResponseDTO> getListaConsultas() {
+        return listaConsultas;
+    }
+
+    public void setListaConsultas(List<ConsultaResponseDTO> listaConsultas) {
+        this.listaConsultas = listaConsultas;
+    }
 
     public Long getId() {
         return id;
@@ -171,7 +192,7 @@ public class PacienteResponseDTO {
     public PacienteResponseDTO() {
     }
 
-    public PacienteResponseDTO(Long id, String nomeCompleto, String genero, LocalDate dataNascimento, String cpf, String rg, String orgaoExpedidorRg, String estadoCivil, String telefone, String email, String naturalidade, String contatoEmergencia, List<String> listaAlergias, List<String> listaCuidadosEspecificos, String convenio, String numeroConvenio, LocalDate validadeConvenio, EnderecoDTO endereco) {
+    public PacienteResponseDTO(Long id, String nomeCompleto, String genero, LocalDate dataNascimento, String cpf, String rg, String orgaoExpedidorRg, String estadoCivil, String telefone, String email, String naturalidade, String contatoEmergencia, List<String> listaAlergias, List<String> listaCuidadosEspecificos, String convenio, String numeroConvenio, LocalDate validadeConvenio, EnderecoDTO endereco, List<ExameResponseDTO> listaExames, List<ConsultaResponseDTO> listaConsultas) {
         this.id = id;
         this.nomeCompleto = nomeCompleto;
         this.genero = genero;
@@ -190,5 +211,7 @@ public class PacienteResponseDTO {
         this.numeroConvenio = numeroConvenio;
         this.validadeConvenio = validadeConvenio;
         this.endereco = endereco;
+        this.listaExames = listaExames;
+        this.listaConsultas = listaConsultas;
     }
 }

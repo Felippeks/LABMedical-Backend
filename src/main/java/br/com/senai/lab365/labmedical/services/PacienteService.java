@@ -59,22 +59,32 @@ public class PacienteService {
         }
         return pacientesCriados;
     }
-    @Transactional
-    public Page<PacienteResponseDTO> listarPacientesParaProntuario(String nome, String numeroRegistro, Pageable pageable) {
+    public Page<PacienteResponseDTO> listarPacientesParaProntuario(String nomeCompleto, String numeroConvenio, Pageable pageable) {
         Specification<PacienteEntity> spec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
 
-            if (nome != null && !nome.isEmpty()) {
-                predicates.add(cb.like(cb.lower(root.get("nomeCompleto")), "%" + nome.toLowerCase() + "%"));
+            if (nomeCompleto != null && !nomeCompleto.isEmpty()) {
+                predicates.add(cb.like(cb.lower(root.get("nomeCompleto")), "%" + nomeCompleto.toLowerCase() + "%"));
             }
-            if (numeroRegistro != null && !numeroRegistro.isEmpty()) {
-                predicates.add(cb.like(root.get("numeroConvenio"), "%" + numeroRegistro + "%"));
+            if (numeroConvenio != null && !numeroConvenio.isEmpty()) {
+                predicates.add(cb.like(root.get("numeroConvenio"), "%" + numeroConvenio + "%"));
             }
 
             return cb.and(predicates.toArray(new Predicate[0]));
         };
 
-        return pacienteRepository.findAll(spec, pageable).map(this::convertToResponseDTO);
+        return pacienteRepository.findAll(spec, pageable).map(paciente -> {
+            PacienteResponseDTO dto = convertToResponseDTO(paciente);
+            dto.setListaExames(paciente.getExames().stream()
+                    .map(this::convertExameToResponseDTO)
+                    .sorted(Comparator.comparing(ExameResponseDTO::getDataExame))
+                    .collect(Collectors.toList()));
+            dto.setListaConsultas(paciente.getConsultas().stream()
+                    .map(this::convertConsultaToResponseDTO)
+                    .sorted(Comparator.comparing(ConsultaResponseDTO::getDataConsulta))
+                    .collect(Collectors.toList()));
+            return dto;
+        });
     }
 
     public ProntuarioResponseDTO listarProntuariosDoPaciente(Long id) {
