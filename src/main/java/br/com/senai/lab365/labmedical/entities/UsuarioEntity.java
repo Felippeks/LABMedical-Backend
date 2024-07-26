@@ -1,5 +1,6 @@
 package br.com.senai.lab365.labmedical.entities;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -15,25 +16,34 @@ public class UsuarioEntity implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(nullable = false)
+    @Schema(description = "Identificador do usuário", example = "1")
     private Long id;
 
     @Column(nullable = false, length = 255)
+    @Schema(description = "Nome do usuário", example = "João da Silva")
     private String nome;
 
+
     @Column(nullable = false, unique = true, length = 255)
+    @Schema(description = "E-mail do usuário", example = "email@email.com")
     private String email;
 
     @Column(nullable = false)
+    @Schema(description = "Data de nascimento do usuário", example = "1990-01-01")
     private LocalDate dataNascimento;
 
     @Column(nullable = false, unique = true, length = 14)
+    @Schema(description = "CPF do usuário", example = "123.456.789-00")
     private String cpf;
 
     @Column(nullable = false, length = 255)
+    @Schema(description = "Senha do usuário", example = "123456")
     private String password;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    @Schema(description = "Perfil do usuário", example = "PACIENTE")
     private Perfil perfil;
 
     public UsuarioEntity() {
