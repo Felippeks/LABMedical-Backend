@@ -3,6 +3,7 @@ package br.com.senai.lab365.labmedical.controllers;
 import br.com.senai.lab365.labmedical.dtos.paciente.PacienteRequestDTO;
 import br.com.senai.lab365.labmedical.dtos.paciente.PacienteResponseDTO;
 import br.com.senai.lab365.labmedical.dtos.prontuarios.ProntuarioResponseDTO;
+import br.com.senai.lab365.labmedical.exceptions.paciente.PacienteNaoEncontradoException;
 import br.com.senai.lab365.labmedical.services.PacienteService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -117,9 +118,17 @@ public class PacienteController {
             @ApiResponse(responseCode = "200", description = "Prontuários do paciente recuperados com sucesso",
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = ProntuarioResponseDTO.class))),
-            @ApiResponse(responseCode = "404", description = "Paciente não encontrado")})
+            @ApiResponse(responseCode = "404", description = "Paciente não encontrado"),
+            @ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos"),
+            @ApiResponse(responseCode = "500", description = "Erro interno do servidor")})
     public ResponseEntity<ProntuarioResponseDTO> listarProntuariosDoPaciente(@PathVariable Long id) {
-        ProntuarioResponseDTO prontuario = pacienteService.listarProntuariosDoPaciente(id);
-        return ResponseEntity.ok(prontuario);
+        try {
+            ProntuarioResponseDTO prontuario = pacienteService.listarProntuariosDoPaciente(id);
+            return ResponseEntity.ok(prontuario);
+        } catch (PacienteNaoEncontradoException ex) {
+            throw ex;
+        } catch (Exception ex) {
+            throw new RuntimeException("Erro interno do servidor", ex);
+        }
     }
 }
