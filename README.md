@@ -24,7 +24,6 @@ The application will include the following endpoints, secured with JWT tokens vi
 - **Login Endpoint**
 - **Registration Endpoint**
 - **Patient Entity Endpoints**
-    - List all patients
 - **Consultation Entity Endpoints**
 - **Examination Entity Endpoints**
 - **Medical Record Entity Endpoints**
@@ -46,35 +45,64 @@ Below is the structure of the Labmedical project:
 |   |   |                       |   LabmedicalApplication.java
 |   |   |                       |
 |   |   |                       +---config
+|   |   |                       |       JacksonConfig.java
 |   |   |                       |       SecurityConfig.java
 |   |   |                       |       SpringDocConfig.java
 |   |   |                       |
 |   |   |                       +---controllers
+|   |   |                       |       ConsultaController.java
+|   |   |                       |       DashboardController.java
+|   |   |                       |       ExameController.java
 |   |   |                       |       PacienteController.java
-|   |   |                       |       
+|   |   |                       |
 |   |   |                       +---dtos
-|   |   |                       |   \---paciente
-|   |   |                       |           EnderecoDTO.java
-|   |   |                       |           PacienteRequestDTO.java
-|   |   |                       |           PacienteResponseDTO.java
+|   |   |                       |   +---consultas
+|   |   |                       |   |       ConsultaRequestDTO.java
+|   |   |                       |   |       ConsultaResponseDTO.java
+|   |   |                       |   |
+|   |   |                       |   +---dashboard
+|   |   |                       |   |       DashboardDTO.java
+|   |   |                       |   |
+|   |   |                       |   +---exames
+|   |   |                       |   |       ExameRequestDTO.java
+|   |   |                       |   |       ExameResponseDTO.java
+|   |   |                       |   |
+|   |   |                       |   +---paciente
+|   |   |                       |   |       EnderecoDTO.java
+|   |   |                       |   |       PacienteRequestDTO.java
+|   |   |                       |   |       PacienteResponseDTO.java
+|   |   |                       |   |
+|   |   |                       |   \---prontuarios
+|   |   |                       |           ProntuarioResponseDTO.java
 |   |   |                       |
 |   |   |                       +---entities
+|   |   |                       |       ConsultaEntity.java
 |   |   |                       |       Endereco.java
+|   |   |                       |       ExameEntity.java
 |   |   |                       |       PacienteEntity.java
 |   |   |                       |
 |   |   |                       +---exceptions
 |   |   |                       |   |   GlobalExceptionHandler.java
 |   |   |                       |   |
 |   |   |                       |   +---consulta
+|   |   |                       |   +---exames
+|   |   |                       |   |       BadRequestException.java
+|   |   |                       |   |       ResourceNotFoundException.java
+|   |   |                       |   |
 |   |   |                       |   \---paciente
 |   |   |                       |           CampoObrigatorioException.java
 |   |   |                       |           CpfJaCadastradoException.java
 |   |   |                       |           PacienteNaoEncontradoException.java
 |   |   |                       |
 |   |   |                       +---repositories
+|   |   |                       |       ConsultaRepository.java
+|   |   |                       |       ExameRepository.java
 |   |   |                       |       PacienteRepository.java
 |   |   |                       |
 |   |   |                       +---services
+|   |   |                       |       ConsultaService.java
+|   |   |                       |       DashboardService.java
+|   |   |                       |       ExameService.java
 |   |   |                       |       PacienteService.java
 |   |   |                       |
 |   |   |                       \---util
@@ -101,9 +129,6 @@ Below is the structure of the Labmedical project:
 3. Configure application properties for database access.
 4. Run the application using Maven: `mvn spring-boot:run`.
 
-## Contributing
-
-Please follow the GitFlow pattern for branching and make sure to keep commits short and concise. For task management, refer to the project's Trello board.
 
 ## License
 
