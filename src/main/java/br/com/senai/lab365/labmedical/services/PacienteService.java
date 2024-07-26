@@ -1,9 +1,14 @@
 package br.com.senai.lab365.labmedical.services;
 
+import br.com.senai.lab365.labmedical.dtos.consultas.ConsultaResponseDTO;
+import br.com.senai.lab365.labmedical.dtos.exames.ExameResponseDTO;
 import br.com.senai.lab365.labmedical.dtos.paciente.EnderecoDTO;
 import br.com.senai.lab365.labmedical.dtos.paciente.PacienteRequestDTO;
 import br.com.senai.lab365.labmedical.dtos.paciente.PacienteResponseDTO;
+import br.com.senai.lab365.labmedical.dtos.prontuarios.ProntuarioResponseDTO;
+import br.com.senai.lab365.labmedical.entities.ConsultaEntity;
 import br.com.senai.lab365.labmedical.entities.Endereco;
+import br.com.senai.lab365.labmedical.entities.ExameEntity;
 import br.com.senai.lab365.labmedical.entities.PacienteEntity;
 import br.com.senai.lab365.labmedical.exceptions.paciente.CpfJaCadastradoException;
 import br.com.senai.lab365.labmedical.exceptions.paciente.PacienteNaoEncontradoException;
@@ -17,8 +22,10 @@ import org.springframework.transaction.annotation.Transactional;
 import jakarta.persistence.criteria.Predicate;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static br.com.senai.lab365.labmedical.util.ValidarCampoObrigatorio.validarCampoObrigatorio;
 
@@ -51,6 +58,49 @@ public class PacienteService {
             pacientesCriados.add(convertToResponseDTO(savedEntity));
         }
         return pacientesCriados;
+    }
+    @Transactional
+    public Page<PacienteResponseDTO> listarPacientesParaProntuario(String nome, String numeroRegistro, Pageable pageable) {
+        Specification<PacienteEntity> spec = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            if (nome != null && !nome.isEmpty()) {
+                predicates.add(cb.like(cb.lower(root.get("nomeCompleto")), "%" + nome.toLowerCase() + "%"));
+            }
+            if (numeroRegistro != null && !numeroRegistro.isEmpty()) {
+                predicates.add(cb.like(root.get("numeroConvenio"), "%" + numeroRegistro + "%"));
+            }
+
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+
+        return pacienteRepository.findAll(spec, pageable).map(this::convertToResponseDTO);
+    }
+
+    public ProntuarioResponseDTO listarProntuariosDoPaciente(Long id) {
+        PacienteEntity paciente = pacienteRepository.findById(id)
+                .orElseThrow(() -> new PacienteNaoEncontradoException("Paciente não encontrado"));
+
+        ProntuarioResponseDTO prontuario = new ProntuarioResponseDTO();
+        prontuario.setNomeCompleto(paciente.getNomeCompleto());
+        prontuario.setConvenio(paciente.getConvenio());
+        prontuario.setContatoEmergencia(paciente.getContatoEmergencia());
+        prontuario.setListaAlergias(paciente.getListaAlergias());
+        prontuario.setListaCuidadosEspecificos(paciente.getListaCuidadosEspecificos());
+
+        List<ExameResponseDTO> exames = paciente.getExames().stream()
+                .map(this::convertExameToResponseDTO)
+                .sorted(Comparator.comparing(ExameResponseDTO::getDataExame))
+                .collect(Collectors.toList());
+        prontuario.setListaExames(exames);
+
+        List<ConsultaResponseDTO> consultas = paciente.getConsultas().stream()
+                .map(this::convertConsultaToResponseDTO)
+                .sorted(Comparator.comparing(ConsultaResponseDTO::getDataConsulta))
+                .collect(Collectors.toList());
+        prontuario.setListaConsultas(consultas);
+
+        return prontuario;
     }
 
     private void validarCamposObrigatorios(PacienteEntity pacienteEntity) {
@@ -211,6 +261,33 @@ public class PacienteService {
         dto.setComplemento(entity.getComplemento());
         dto.setBairro(entity.getBairro());
         dto.setPontoDeReferencia(entity.getPontoDeReferencia());
+        return dto;
+    }
+
+    private ExameResponseDTO convertExameToResponseDTO(ExameEntity exame) {
+        ExameResponseDTO dto = new ExameResponseDTO();
+        dto.setId(exame.getId());
+        dto.setNomeExame(exame.getNomeExame());
+        dto.setDataExame(exame.getDataExame());
+        dto.setHorarioExame(exame.getHorarioExame());
+        dto.setTipoExame(exame.getTipoExame());
+        dto.setLaboratorio(exame.getLaboratorio());
+        dto.setUrlDocumento(exame.getUrlDocumento());
+        dto.setResultados(exame.getResultados());
+        dto.setPacienteId(exame.getPaciente().getId());
+        return dto;
+    }
+
+    private ConsultaResponseDTO convertConsultaToResponseDTO(ConsultaEntity consulta) {
+        ConsultaResponseDTO dto = new ConsultaResponseDTO();
+        dto.setId(consulta.getId());
+        dto.setDataConsulta(consulta.getDataConsulta());
+        dto.setHorarioConsulta(consulta.getHorarioConsulta());
+        dto.setPacienteId(consulta.getPaciente().getId());
+        dto.setMotivoConsulta(consulta.getMotivoConsulta());
+        dto.setDescricaoProblema(consulta.getDescricaoProblema());
+        dto.setMedicacaoReceitada(consulta.getMedicacaoReceitada());
+        dto.setDosagemPrecaucoes(consulta.getDosagemPrecaucoes());
         return dto;
     }
 }
