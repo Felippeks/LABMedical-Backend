@@ -2,6 +2,8 @@ package br.com.senai.lab365.labmedical.controllers;
 
 import br.com.senai.lab365.labmedical.dtos.paciente.PacienteRequestDTO;
 import br.com.senai.lab365.labmedical.dtos.paciente.PacienteResponseDTO;
+import br.com.senai.lab365.labmedical.dtos.prontuarios.ProntuarioResponseDTO;
+import br.com.senai.lab365.labmedical.exceptions.paciente.PacienteNaoEncontradoException;
 import br.com.senai.lab365.labmedical.services.PacienteService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -95,5 +97,38 @@ public class PacienteController {
     public ResponseEntity<PacienteResponseDTO> buscarPacientePorId(@PathVariable Long id) {
         Optional<PacienteResponseDTO> paciente = pacienteService.buscarPacientePorId(id);
         return paciente.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+
+    @GetMapping("/prontuarios")
+    @Operation(summary = "Lista pacientes para prontuário com filtros opcionais", responses = {
+            @ApiResponse(responseCode = "200", description = "Lista de pacientes recuperada com sucesso",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = Page.class)))})
+    public ResponseEntity<Page<PacienteResponseDTO>> listarPacientesParaProntuario(
+            @RequestParam(required = false) String nome,
+            @RequestParam(required = false) String numeroRegistro,
+            Pageable pageable) {
+        Page<PacienteResponseDTO> pacientes = pacienteService.listarPacientesParaProntuario(nome, numeroRegistro, pageable);
+        return ResponseEntity.ok(pacientes);
+    }
+
+    @GetMapping("/{id}/prontuarios")
+    @Operation(summary = "Lista prontuários de um paciente", responses = {
+            @ApiResponse(responseCode = "200", description = "Prontuários do paciente recuperados com sucesso",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ProntuarioResponseDTO.class))),
+            @ApiResponse(responseCode = "404", description = "Paciente não encontrado"),
+            @ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos"),
+            @ApiResponse(responseCode = "500", description = "Erro interno do servidor")})
+    public ResponseEntity<ProntuarioResponseDTO> listarProntuariosDoPaciente(@PathVariable Long id) {
+        try {
+            ProntuarioResponseDTO prontuario = pacienteService.listarProntuariosDoPaciente(id);
+            return ResponseEntity.ok(prontuario);
+        } catch (PacienteNaoEncontradoException ex) {
+            throw ex;
+        } catch (Exception ex) {
+            throw new RuntimeException("Erro interno do servidor", ex);
+        }
     }
 }
