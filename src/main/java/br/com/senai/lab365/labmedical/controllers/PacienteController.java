@@ -106,10 +106,10 @@ public class PacienteController {
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = Page.class)))})
     public ResponseEntity<Page<PacienteResponseDTO>> listarPacientesParaProntuario(
-            @RequestParam(required = false) String nome,
-            @RequestParam(required = false) String numeroRegistro,
+            @RequestParam(required = false) String nomeCompleto,
+            @RequestParam(required = false) String numeroConvenio,
             Pageable pageable) {
-        Page<PacienteResponseDTO> pacientes = pacienteService.listarPacientesParaProntuario(nome, numeroRegistro, pageable);
+        Page<PacienteResponseDTO> pacientes = pacienteService.listarPacientesParaProntuario(nomeCompleto, numeroConvenio, pageable);
         return ResponseEntity.ok(pacientes);
     }
 
