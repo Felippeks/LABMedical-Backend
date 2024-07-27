@@ -10,7 +10,10 @@ import br.com.senai.lab365.labmedical.repositories.ExameRepository;
 import br.com.senai.lab365.labmedical.repositories.PacienteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.security.core.GrantedAuthority;
 
 import java.util.List;
 import java.util.Optional;
@@ -60,14 +63,21 @@ public class ExameService {
     }
 
     public ExameResponseDTO getExameById(Long id) {
-        Long pacienteId = authService.getPacienteAutenticadoId();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        boolean isAdminOrMedico = authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .anyMatch(role -> role.equals("ROLE_ADMIN") || role.equals("ROLE_MEDICO"));
+
         Optional<ExameEntity> exameEntityOptional = exameRepository.findById(id);
 
         if (exameEntityOptional.isPresent()) {
             ExameEntity exameEntity = exameEntityOptional.get();
 
-            if (!exameEntity.getPaciente().getId().equals(pacienteId)) {
-                throw new AccessDeniedException("Você não tem permissão para acessar este exame");
+            if (!isAdminOrMedico) {
+                Long pacienteId = authService.getPacienteAutenticadoId();
+                if (!exameEntity.getPaciente().getId().equals(pacienteId)) {
+                    throw new AccessDeniedException("Você não tem permissão para acessar este exame");
+                }
             }
 
             return new ExameResponseDTO(
