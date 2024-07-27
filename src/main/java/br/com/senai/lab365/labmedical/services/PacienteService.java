@@ -6,20 +6,20 @@ import br.com.senai.lab365.labmedical.dtos.paciente.EnderecoDTO;
 import br.com.senai.lab365.labmedical.dtos.paciente.PacienteRequestDTO;
 import br.com.senai.lab365.labmedical.dtos.paciente.PacienteResponseDTO;
 import br.com.senai.lab365.labmedical.dtos.prontuarios.ProntuarioResponseDTO;
-import br.com.senai.lab365.labmedical.entities.ConsultaEntity;
-import br.com.senai.lab365.labmedical.entities.Endereco;
-import br.com.senai.lab365.labmedical.entities.ExameEntity;
-import br.com.senai.lab365.labmedical.entities.PacienteEntity;
+import br.com.senai.lab365.labmedical.entities.*;
 import br.com.senai.lab365.labmedical.exceptions.paciente.CpfJaCadastradoException;
 import br.com.senai.lab365.labmedical.exceptions.paciente.PacienteNaoEncontradoException;
 import br.com.senai.lab365.labmedical.repositories.PacienteRepository;
+import br.com.senai.lab365.labmedical.repositories.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import jakarta.persistence.criteria.Predicate;
+
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -32,26 +32,44 @@ import static br.com.senai.lab365.labmedical.util.ValidarCampoObrigatorio.valida
 @Service
 public class PacienteService {
     private final PacienteRepository pacienteRepository;
+    private final UsuarioRepository usuarioRepository;
 
     @Autowired
-    public PacienteService(PacienteRepository pacienteRepository) {
+    public PacienteService(PacienteRepository pacienteRepository, UsuarioRepository usuarioRepository) {
         this.pacienteRepository = pacienteRepository;
+        this.usuarioRepository = usuarioRepository;
     }
-
     @Transactional
     public PacienteResponseDTO criarPaciente(PacienteRequestDTO pacienteRequestDTO) {
+        UsuarioEntity usuario = usuarioRepository.findById(pacienteRequestDTO.getUsuario().getId())
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+
+        if (!usuario.getPerfil().equals(Perfil.PACIENTE)) {
+            throw new RuntimeException("Usuário não possui perfil de paciente");
+        }
+
         PacienteEntity pacienteEntity = convertToEntity(pacienteRequestDTO);
+        pacienteEntity.setUsuario(usuario);
         validarCamposObrigatorios(pacienteEntity);
         verificarCpfDuplicado(pacienteEntity.getCpf());
         PacienteEntity savedEntity = pacienteRepository.save(pacienteEntity);
         return convertToResponseDTO(savedEntity);
     }
 
+
     @Transactional
     public List<PacienteResponseDTO> criarPacientesEmLote(List<PacienteRequestDTO> pacientes) {
         List<PacienteResponseDTO> pacientesCriados = new ArrayList<>();
         for (PacienteRequestDTO pacienteRequestDTO : pacientes) {
+            UsuarioEntity usuario = usuarioRepository.findById(pacienteRequestDTO.getUsuario().getId())
+                    .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+
+            if (!usuario.getPerfil().equals(Perfil.PACIENTE)) {
+                throw new RuntimeException("Usuário não possui perfil de paciente");
+            }
+
             PacienteEntity pacienteEntity = convertToEntity(pacienteRequestDTO);
+            pacienteEntity.setUsuario(usuario);
             validarCamposObrigatorios(pacienteEntity);
             verificarCpfDuplicado(pacienteEntity.getCpf());
             PacienteEntity savedEntity = pacienteRepository.save(pacienteEntity);
@@ -59,6 +77,7 @@ public class PacienteService {
         }
         return pacientesCriados;
     }
+
     public Page<PacienteResponseDTO> listarPacientesParaProntuario(String nomeCompleto, String numeroConvenio, Pageable pageable) {
         Specification<PacienteEntity> spec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
@@ -176,6 +195,17 @@ public class PacienteService {
 
         return pacienteRepository.findAll(spec, pageable).map(this::convertToResponseDTO);
     }
+    public Optional<PacienteResponseDTO> buscarPacientePorIdEVerificarPermissao(Long id, String username) {
+        UsuarioEntity usuario = usuarioRepository.findByEmail(username)
+                .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado"));
+        Optional<PacienteEntity> paciente = pacienteRepository.findById(id);
+
+        if (paciente.isPresent() && paciente.get().getUsuario().getId().equals(usuario.getId())) {
+            return Optional.of(convertToResponseDTO(paciente.get()));
+        } else {
+            return Optional.empty();
+        }
+    }
 
     private PacienteEntity convertToEntity(PacienteRequestDTO dto) {
         PacienteEntity entity = new PacienteEntity();
@@ -198,6 +228,7 @@ public class PacienteService {
         entity.setEndereco(convertToEntity(dto.getEndereco()));
         return entity;
     }
+
 
     private PacienteResponseDTO convertToResponseDTO(PacienteEntity entity) {
         PacienteResponseDTO dto = new PacienteResponseDTO();

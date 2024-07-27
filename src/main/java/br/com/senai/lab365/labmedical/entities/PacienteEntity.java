@@ -107,6 +107,11 @@ public class PacienteEntity {
     @Schema(description = "Lista de consultas do paciente")
     private List<ConsultaEntity> consultas = new ArrayList<>();
 
+    @OneToOne
+    @JoinColumn(name = "id_usuario", nullable = false)
+    @Schema(description = "Identificador do usuário de acesso do paciente", example = "1")
+    private UsuarioEntity usuario;
+
     public Long getId() {
         return id;
     }
@@ -265,6 +270,14 @@ public class PacienteEntity {
 
     public void setExames(List<ExameEntity> exames) {
         this.exames = exames;
+    }
+
+    public UsuarioEntity getUsuario() {
+        return usuario;
+    }
+
+    public void setUsuario(UsuarioEntity usuario) {
+        this.usuario = usuario;
     }
 
     public PacienteEntity() {

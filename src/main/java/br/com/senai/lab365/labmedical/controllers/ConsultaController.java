@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
@@ -50,10 +51,15 @@ public class ConsultaController {
     @Operation(summary = "Recupera uma consulta", description = "Recupera uma consulta pelo ID", tags = {"consultas"})
     @ApiResponse(responseCode = "200", description = "Consulta recuperada com sucesso", content = @io.swagger.v3.oas.annotations.media.Content(schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = ConsultaResponseDTO.class)))
     @ApiResponse(responseCode = "404", description = "Consulta não encontrada")
+    @ApiResponse(responseCode = "403", description = "Acesso negado")
     public ResponseEntity<ConsultaResponseDTO> getConsultaById(@PathVariable Long id) {
-        Optional<ConsultaResponseDTO> consulta = consultaService.getConsultaById(id);
-        return consulta.map(ResponseEntity::ok)
-                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+        try {
+            Optional<ConsultaResponseDTO> consulta = consultaService.getConsultaById(id);
+            return consulta.map(ResponseEntity::ok)
+                    .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+        } catch (AccessDeniedException e) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
     }
 
     @PutMapping("/{id}")

@@ -4,9 +4,11 @@ import br.com.senai.lab365.labmedical.dtos.consultas.ConsultaRequestDTO;
 import br.com.senai.lab365.labmedical.dtos.consultas.ConsultaResponseDTO;
 import br.com.senai.lab365.labmedical.entities.ConsultaEntity;
 import br.com.senai.lab365.labmedical.entities.PacienteEntity;
+import br.com.senai.lab365.labmedical.exceptions.exames.ResourceNotFoundException;
 import br.com.senai.lab365.labmedical.repositories.ConsultaRepository;
 import br.com.senai.lab365.labmedical.repositories.PacienteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,6 +23,9 @@ public class ConsultaService {
 
     @Autowired
     private PacienteRepository pacienteRepository;
+
+    @Autowired
+    private AuthService authService;
 
     public ConsultaResponseDTO createConsulta(ConsultaRequestDTO consultaRequestDTO) {
         ConsultaEntity consulta = new ConsultaEntity();
@@ -39,8 +44,30 @@ public class ConsultaService {
         return new ConsultaResponseDTO(savedConsulta.getId(), savedConsulta.getMotivoConsulta(), savedConsulta.getDataConsulta(), savedConsulta.getHorarioConsulta(), savedConsulta.getDescricaoProblema(), savedConsulta.getMedicacaoReceitada(), savedConsulta.getDosagemPrecaucoes(), savedConsulta.getPaciente().getId());
     }
 
-    public Optional<ConsultaResponseDTO> getConsultaById(Long id) {
-        return consultaRepository.findById(id).map(consulta -> new ConsultaResponseDTO(consulta.getId(), consulta.getMotivoConsulta(), consulta.getDataConsulta(), consulta.getHorarioConsulta(), consulta.getDescricaoProblema(), consulta.getMedicacaoReceitada(), consulta.getDosagemPrecaucoes(), consulta.getPaciente().getId()));
+     public Optional<ConsultaResponseDTO> getConsultaById(Long id) {
+        Long pacienteId = authService.getPacienteAutenticadoId();
+        Optional<ConsultaEntity> consultaEntityOptional = consultaRepository.findById(id);
+
+        if (consultaEntityOptional.isPresent()) {
+            ConsultaEntity consultaEntity = consultaEntityOptional.get();
+
+            if (!consultaEntity.getPaciente().getId().equals(pacienteId)) {
+                throw new AccessDeniedException("Você não tem permissão para acessar esta consulta");
+            }
+
+            return Optional.of(new ConsultaResponseDTO(
+                    consultaEntity.getId(),
+                    consultaEntity.getMotivoConsulta(),
+                    consultaEntity.getDataConsulta(),
+                    consultaEntity.getHorarioConsulta(),
+                    consultaEntity.getDescricaoProblema(),
+                    consultaEntity.getMedicacaoReceitada(),
+                    consultaEntity.getDosagemPrecaucoes(),
+                    consultaEntity.getPaciente().getId()
+            ));
+        } else {
+            throw new ResourceNotFoundException("Consulta não encontrada");
+        }
     }
 
     public ConsultaResponseDTO updateConsulta(Long id, ConsultaRequestDTO consultaRequestDTO) {

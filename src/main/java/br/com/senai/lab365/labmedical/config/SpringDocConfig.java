@@ -36,4 +36,11 @@ public class SpringDocConfig {
                 .pathsToMatch("/api/dashboard/**")
                 .build();
     }
+    @Bean
+    public GroupedOpenApi usuarioApi() {
+        return GroupedOpenApi.builder()
+                .group("usuarios")
+                .pathsToMatch("/api/usuarios/**")
+                .build();
+    }
 }
