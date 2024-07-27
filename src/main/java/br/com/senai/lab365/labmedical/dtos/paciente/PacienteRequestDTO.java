@@ -1,5 +1,9 @@
 package br.com.senai.lab365.labmedical.dtos.paciente;
 
+import br.com.senai.lab365.labmedical.dtos.cadastros.CadastroRequestDTO;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
+
 import java.time.LocalDate;
 import java.util.List;
 
@@ -21,6 +25,10 @@ public class PacienteRequestDTO {
     private String numeroConvenio;
     private LocalDate validadeConvenio;
     private EnderecoDTO endereco;
+
+    @NotNull
+    @Schema(description = "Identificador do usuário de acesso do paciente", example = "1")
+    private CadastroRequestDTO usuario;
 
     public String getNomeCompleto() {
         return nomeCompleto;
@@ -158,13 +166,20 @@ public class PacienteRequestDTO {
         this.endereco = endereco;
     }
 
-
-    public PacienteRequestDTO() {
-
+    public CadastroRequestDTO getUsuario() {
+        return usuario;
     }
 
-    public PacienteRequestDTO(String nomeCompleto, String genero, LocalDate dataNascimento, String cpf, String rg, String orgaoExpedidorRg, String estadoCivil, String telefone, String email, String naturalidade, String contatoEmergencia, List<String> listaAlergias, List<String> listaCuidadosEspecificos, String convenio, String numeroConvenio, LocalDate validadeConvenio, EnderecoDTO endereco) {
+    public void setUsuario(CadastroRequestDTO usuario) {
+        this.usuario = usuario;
+    }
+
+    public PacienteRequestDTO() {
+    }
+
+    public PacienteRequestDTO(String nomeCompleto, LocalDate validadeConvenio, String genero, LocalDate dataNascimento, String cpf, String rg, String orgaoExpedidorRg, String estadoCivil, String telefone, String email, String naturalidade, String contatoEmergencia, List<String> listaAlergias, List<String> listaCuidadosEspecificos, String convenio, String numeroConvenio, EnderecoDTO endereco, CadastroRequestDTO usuario) {
         this.nomeCompleto = nomeCompleto;
+        this.validadeConvenio = validadeConvenio;
         this.genero = genero;
         this.dataNascimento = dataNascimento;
         this.cpf = cpf;
@@ -179,7 +194,7 @@ public class PacienteRequestDTO {
         this.listaCuidadosEspecificos = listaCuidadosEspecificos;
         this.convenio = convenio;
         this.numeroConvenio = numeroConvenio;
-        this.validadeConvenio = validadeConvenio;
         this.endereco = endereco;
+        this.usuario = usuario;
     }
 }

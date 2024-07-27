@@ -30,6 +30,8 @@ public class CadastroRequestDTO {
     @NotNull
     private Perfil perfil;
 
+    private Long id; // Add the id field
+
     public CadastroRequestDTO() {
     }
 
@@ -89,5 +91,12 @@ public class CadastroRequestDTO {
     public void setPerfil(Perfil perfil) {
         this.perfil = perfil;
     }
-}
 
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+}

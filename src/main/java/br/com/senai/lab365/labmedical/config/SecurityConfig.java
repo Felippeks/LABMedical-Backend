@@ -29,6 +29,7 @@ public class SecurityConfig {
         http.csrf().disable()
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/usuarios/login").permitAll()
+                        .requestMatchers("/api/pacientes/**").permitAll()
                         .requestMatchers("/api/usuarios/cadastro").hasRole("ADMIN")
                         .requestMatchers("/swagger-ui/**", "/api-docs/**", "/swagger-ui.html", "/webjars/**", "/swagger-resources/**").permitAll()
                         .anyRequest().authenticated()
