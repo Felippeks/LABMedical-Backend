@@ -29,12 +29,20 @@ public class SecurityConfig {
         http.csrf().disable()
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/usuarios/login").permitAll()
-                        .requestMatchers("/api/pacientes/**").permitAll()
                         .requestMatchers("/api/usuarios/cadastro").hasRole("ADMIN")
+                        .requestMatchers("/api/pacientes").hasAnyRole("ADMIN", "MEDICO")
+                        .requestMatchers("/api/pacientes/**").hasAnyRole("ADMIN", "MEDICO", "PACIENTE")
+                        .requestMatchers("/api/consultas").hasAnyRole("ADMIN", "MEDICO")
+                        .requestMatchers("/api/consultas/**").hasAnyRole("ADMIN", "MEDICO", "PACIENTE")
+                        .requestMatchers("/api/exames").hasAnyRole("ADMIN", "MEDICO")
+                        .requestMatchers("/api/exames/**").hasAnyRole("ADMIN", "MEDICO", "PACIENTE")
+                        .requestMatchers("/api/pacientes/prontuarios").hasAnyRole("ADMIN", "MEDICO")
+                        .requestMatchers("/api/pacientes/{id}/prontuarios").hasAnyRole("ADMIN", "MEDICO")
+                        .requestMatchers("/api/dashboard").hasAnyRole("ADMIN", "MEDICO")
                         .requestMatchers("/swagger-ui/**", "/api-docs/**", "/swagger-ui.html", "/webjars/**", "/swagger-resources/**").permitAll()
                         .anyRequest().authenticated()
                 )
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 

@@ -107,7 +107,7 @@ public class PacienteEntity {
     @Schema(description = "Lista de consultas do paciente")
     private List<ConsultaEntity> consultas = new ArrayList<>();
 
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "id_usuario", nullable = false)
     @Schema(description = "Identificador do usuário de acesso do paciente", example = "1")
     private UsuarioEntity usuario;

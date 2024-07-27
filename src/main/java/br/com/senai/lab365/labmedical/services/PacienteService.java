@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import jakarta.persistence.criteria.Predicate;
@@ -193,6 +194,17 @@ public class PacienteService {
         };
 
         return pacienteRepository.findAll(spec, pageable).map(this::convertToResponseDTO);
+    }
+    public Optional<PacienteResponseDTO> buscarPacientePorIdEVerificarPermissao(Long id, String username) {
+        UsuarioEntity usuario = usuarioRepository.findByEmail(username)
+                .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado"));
+        Optional<PacienteEntity> paciente = pacienteRepository.findById(id);
+
+        if (paciente.isPresent() && paciente.get().getUsuario().getId().equals(usuario.getId())) {
+            return Optional.of(convertToResponseDTO(paciente.get()));
+        } else {
+            return Optional.empty();
+        }
     }
 
     private PacienteEntity convertToEntity(PacienteRequestDTO dto) {

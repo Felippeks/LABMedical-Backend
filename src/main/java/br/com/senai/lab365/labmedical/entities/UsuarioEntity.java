@@ -46,6 +46,18 @@ public class UsuarioEntity implements UserDetails {
     @Schema(description = "Perfil do usuário", example = "PACIENTE")
     private Perfil perfil;
 
+    @OneToOne(mappedBy = "usuario")
+    @JoinColumn(name = "paciente_id")
+    private PacienteEntity paciente;
+
+    public PacienteEntity getPaciente() {
+        return paciente;
+    }
+
+    public void setPaciente(PacienteEntity paciente) {
+        this.paciente = paciente;
+    }
+
     public UsuarioEntity() {
     }
 
