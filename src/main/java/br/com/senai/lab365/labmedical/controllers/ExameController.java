@@ -7,6 +7,9 @@ import br.com.senai.lab365.labmedical.services.ExameService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -66,8 +69,10 @@ public class ExameController {
     @GetMapping
     @Operation(summary = "Lista todos os exames", description = "Recupera a lista de todos os exames", tags = {"exames"})
     @ApiResponse(responseCode = "200", description = "Lista de exames recuperada com sucesso")
-    public ResponseEntity<List<ExameResponseDTO>> getAllExames() {
-        List<ExameResponseDTO> exames = exameService.getAllExames();
+    public ResponseEntity<Page<ExameResponseDTO>> getAllExames(@RequestParam(defaultValue = "0") int page,
+                                                               @RequestParam(defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<ExameResponseDTO> exames = exameService.getAllExames(pageable);
         return new ResponseEntity<>(exames, HttpStatus.OK);
     }
 }

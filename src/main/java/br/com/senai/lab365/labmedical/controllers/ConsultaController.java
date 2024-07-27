@@ -6,6 +6,9 @@ import br.com.senai.lab365.labmedical.services.ConsultaService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -80,8 +83,10 @@ public class ConsultaController {
     @GetMapping
     @Operation(summary = "Lista todas as consultas", description = "Lista todas as consultas do banco de dados", tags = {"consultas"})
     @ApiResponse(responseCode = "200", description = "Consultas listadas com sucesso", content = @io.swagger.v3.oas.annotations.media.Content(schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = ConsultaResponseDTO.class)))
-    public ResponseEntity<List<ConsultaResponseDTO>> getAllConsultas() {
-        List<ConsultaResponseDTO> consultas = consultaService.getAllConsultas();
+    public ResponseEntity<Page<ConsultaResponseDTO>> getAllConsultas(@RequestParam(defaultValue = "0") int page,
+                                                                     @RequestParam(defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<ConsultaResponseDTO> consultas = consultaService.getAllConsultas(pageable);
         return new ResponseEntity<>(consultas, HttpStatus.OK);
     }
 

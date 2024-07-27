@@ -9,6 +9,8 @@ import br.com.senai.lab365.labmedical.exceptions.exames.ResourceNotFoundExceptio
 import br.com.senai.lab365.labmedical.repositories.ExameRepository;
 import br.com.senai.lab365.labmedical.repositories.PacienteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -131,19 +133,18 @@ public class ExameService {
         }
     }
 
-    public List<ExameResponseDTO> getAllExames() {
-        List<ExameEntity> exames = exameRepository.findAll();
-        return exames.stream().map(exame -> new ExameResponseDTO(
-                exame.getId(),
-                exame.getNomeExame(),
-                exame.getDataExame(),
-                exame.getHorarioExame(),
-                exame.getTipoExame(),
-                exame.getLaboratorio(),
-                exame.getUrlDocumento(),
-                exame.getResultados(),
-                exame.getPaciente().getId()
-        )).collect(Collectors.toList());
+    public Page<ExameResponseDTO> getAllExames(Pageable pageable) {
+        return exameRepository.findAll(pageable)
+                .map(exame -> new ExameResponseDTO(
+                        exame.getId(),
+                        exame.getNomeExame(),
+                        exame.getDataExame(),
+                        exame.getHorarioExame(),
+                        exame.getTipoExame(),
+                        exame.getLaboratorio(),
+                        exame.getUrlDocumento(),
+                        exame.getResultados(),
+                        exame.getPaciente().getId()));
     }
 
     public void deleteExame(Long id) {

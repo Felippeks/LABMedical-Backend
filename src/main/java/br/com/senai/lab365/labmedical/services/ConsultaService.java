@@ -8,6 +8,8 @@ import br.com.senai.lab365.labmedical.exceptions.exames.ResourceNotFoundExceptio
 import br.com.senai.lab365.labmedical.repositories.ConsultaRepository;
 import br.com.senai.lab365.labmedical.repositories.PacienteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -106,8 +108,8 @@ public class ConsultaService {
         return consultaRepository.findByMotivoConsulta(motivoConsulta).stream().map(consulta -> new ConsultaResponseDTO(consulta.getId(), consulta.getMotivoConsulta(), consulta.getDataConsulta(), consulta.getHorarioConsulta(), consulta.getDescricaoProblema(), consulta.getMedicacaoReceitada(), consulta.getDosagemPrecaucoes(), consulta.getPaciente().getId())).collect(Collectors.toList());
     }
 
-    public List<ConsultaResponseDTO> getAllConsultas() {
-        return consultaRepository.findAll().stream()
+    public Page<ConsultaResponseDTO> getAllConsultas(Pageable pageable) {
+        return consultaRepository.findAll(pageable)
                 .map(consulta -> new ConsultaResponseDTO(
                         consulta.getId(),
                         consulta.getMotivoConsulta(),
@@ -116,7 +118,6 @@ public class ConsultaService {
                         consulta.getDescricaoProblema(),
                         consulta.getMedicacaoReceitada(),
                         consulta.getDosagemPrecaucoes(),
-                        consulta.getPaciente().getId()))
-                .collect(Collectors.toList());
+                        consulta.getPaciente().getId()));
     }
 }
