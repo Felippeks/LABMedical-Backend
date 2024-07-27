@@ -171,10 +171,6 @@ public class PacienteService {
         return true;
     }
 
-    public Optional<PacienteResponseDTO> buscarPacientePorId(Long id) {
-        return pacienteRepository.findById(id)
-                .map(this::convertToResponseDTO);
-    }
 
     public Page<PacienteResponseDTO> listarPacientes(String nome, String telefone, String email, Pageable pageable) {
         Specification<PacienteEntity> spec = (root, query, cb) -> {
@@ -200,11 +196,14 @@ public class PacienteService {
                 .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado"));
         Optional<PacienteEntity> paciente = pacienteRepository.findById(id);
 
-        if (paciente.isPresent() && paciente.get().getUsuario().getId().equals(usuario.getId())) {
-            return Optional.of(convertToResponseDTO(paciente.get()));
-        } else {
-            return Optional.empty();
+        if (paciente.isPresent()) {
+            PacienteEntity pacienteEntity = paciente.get();
+            if (usuario.getPerfil().equals(Perfil.ADMIN) || usuario.getPerfil().equals(Perfil.MEDICO) ||
+                    pacienteEntity.getUsuario().getId().equals(usuario.getId())) {
+                return Optional.of(convertToResponseDTO(pacienteEntity));
+            }
         }
+        return Optional.empty();
     }
 
     private PacienteEntity convertToEntity(PacienteRequestDTO dto) {

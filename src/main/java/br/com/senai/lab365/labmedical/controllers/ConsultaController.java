@@ -35,18 +35,6 @@ public class ConsultaController {
         return new ResponseEntity<>(createdConsulta, HttpStatus.CREATED);
     }
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        Map<String, String> errors = new HashMap<>();
-        ex.getBindingResult().getFieldErrors().forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
-        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<String> handleRuntimeException(RuntimeException ex) {
-        return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
-    }
-
     @GetMapping("/{id}")
     @Operation(summary = "Recupera uma consulta", description = "Recupera uma consulta pelo ID", tags = {"consultas"})
     @ApiResponse(responseCode = "200", description = "Consulta recuperada com sucesso", content = @io.swagger.v3.oas.annotations.media.Content(schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = ConsultaResponseDTO.class)))
