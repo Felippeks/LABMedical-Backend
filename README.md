@@ -29,6 +29,29 @@ The application will include the following endpoints, secured with JWT tokens vi
 - **Medical Record Entity Endpoints**
 - **Dashboard Endpoint**
 
+## Development Setup
+
+### Prerequisites
+
+- Java 21
+- Maven
+- PostgreSQL
+- Docker (optional for database setup)
+
+### Running the Application
+
+1. Clone the repository from GitHub.
+- git clone https://github.com/Felippeks/LABMedical-Backend.git
+2. Set up the PostgreSQL database.
+3. Configure application properties for database access.
+4. Run the application using Maven: `mvn spring-boot:run`.
+
+### Admin Credentials
+The following admin credentials are pre-loaded in the database for testing:
+
+- Email: admin@example.com
+- Password: admin
+
 ## Project Structure
 
 Below is the structure of the Labmedical project:
@@ -45,17 +68,26 @@ Below is the structure of the Labmedical project:
 |   |   |                       |   LabmedicalApplication.java
 |   |   |                       |
 |   |   |                       +---config
-|   |   |                       |       JacksonConfig.java
-|   |   |                       |       SecurityConfig.java
-|   |   |                       |       SpringDocConfig.java
+|   |   |                       |   |   DataLoader.java
+|   |   |                       |   |   JacksonConfig.java
+|   |   |                       |   |   SecurityConfig.java
+|   |   |                       |   |   SpringDocConfig.java
+|   |   |                       |   |
+|   |   |                       |   \---filtros
+|   |   |                       |           JwtAuthenticationFilter.java
 |   |   |                       |
 |   |   |                       +---controllers
 |   |   |                       |       ConsultaController.java
 |   |   |                       |       DashboardController.java
 |   |   |                       |       ExameController.java
 |   |   |                       |       PacienteController.java
+|   |   |                       |       UsuarioController.java
 |   |   |                       |
 |   |   |                       +---dtos
+|   |   |                       |   +---cadastros
+|   |   |                       |   |       CadastroRequestDTO.java
+|   |   |                       |   |       CadastroResponseDTO.java
+|   |   |                       |   |
 |   |   |                       |   +---consultas
 |   |   |                       |   |       ConsultaRequestDTO.java
 |   |   |                       |   |       ConsultaResponseDTO.java
@@ -66,6 +98,10 @@ Below is the structure of the Labmedical project:
 |   |   |                       |   +---exames
 |   |   |                       |   |       ExameRequestDTO.java
 |   |   |                       |   |       ExameResponseDTO.java
+|   |   |                       |   |
+|   |   |                       |   +---login
+|   |   |                       |   |       LoginRequestDTO.java
+|   |   |                       |   |       LoginResponseDTO.java
 |   |   |                       |   |
 |   |   |                       |   +---paciente
 |   |   |                       |   |       EnderecoDTO.java
@@ -80,6 +116,8 @@ Below is the structure of the Labmedical project:
 |   |   |                       |       Endereco.java
 |   |   |                       |       ExameEntity.java
 |   |   |                       |       PacienteEntity.java
+|   |   |                       |       Perfil.java
+|   |   |                       |       UsuarioEntity.java
 |   |   |                       |
 |   |   |                       +---exceptions
 |   |   |                       |   |   GlobalExceptionHandler.java
@@ -98,37 +136,26 @@ Below is the structure of the Labmedical project:
 |   |   |                       |       ConsultaRepository.java
 |   |   |                       |       ExameRepository.java
 |   |   |                       |       PacienteRepository.java
+|   |   |                       |       UsuarioRepository.java
 |   |   |                       |
 |   |   |                       +---services
+|   |   |                       |       AuthService.java
 |   |   |                       |       ConsultaService.java
 |   |   |                       |       DashboardService.java
 |   |   |                       |       ExameService.java
 |   |   |                       |       PacienteService.java
+|   |   |                       |       UserDetailsServiceImpl.java
+|   |   |                       |       UsuarioService.java
 |   |   |                       |
 |   |   |                       \---util
+|   |   |                               JwtUtil.java
 |   |   |                               ValidarCampoObrigatorio.java
 |   |   |
 |   |   \---resources
 |   |       |   application.properties
+|   |       |   private-key.pem
+|   |       |   public-key.pem
 ```
-
-
-## Development Setup
-
-### Prerequisites
-
-- Java 21
-- Maven
-- PostgreSQL
-- Docker (optional for database setup)
-
-### Running the Application
-
-1. Clone the repository from GitHub.
-2. Set up the PostgreSQL database.
-3. Configure application properties for database access.
-4. Run the application using Maven: `mvn spring-boot:run`.
-
 
 ## License
 
