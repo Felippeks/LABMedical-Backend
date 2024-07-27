@@ -4,7 +4,8 @@ import br.com.senai.lab365.labmedical.dtos.consultas.ConsultaRequestDTO;
 import br.com.senai.lab365.labmedical.dtos.consultas.ConsultaResponseDTO;
 import br.com.senai.lab365.labmedical.entities.ConsultaEntity;
 import br.com.senai.lab365.labmedical.entities.PacienteEntity;
-import br.com.senai.lab365.labmedical.exceptions.exames.ResourceNotFoundException;
+import br.com.senai.lab365.labmedical.exceptions.consulta.ConsultaNaoEncontradaException;
+import br.com.senai.lab365.labmedical.exceptions.paciente.PacienteNaoEncontradoException;
 import br.com.senai.lab365.labmedical.repositories.ConsultaRepository;
 import br.com.senai.lab365.labmedical.repositories.PacienteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +43,7 @@ public class ConsultaService {
         consulta.setDosagemPrecaucoes(consultaRequestDTO.getDosagemPrecaucoes());
 
         PacienteEntity paciente = pacienteRepository.findById(consultaRequestDTO.getPacienteId())
-                .orElseThrow(() -> new RuntimeException("Paciente não encontrado"));
+                .orElseThrow(() -> new PacienteNaoEncontradoException("Paciente não encontrado"));
         consulta.setPaciente(paciente);
 
         ConsultaEntity savedConsulta = consultaRepository.save(consulta);
@@ -78,12 +79,12 @@ public class ConsultaService {
                     consultaEntity.getPaciente().getId()
             ));
         } else {
-            throw new ResourceNotFoundException("Consulta não encontrada");
+            throw new ConsultaNaoEncontradaException("Consulta não encontrada");
         }
     }
 
     public ConsultaResponseDTO updateConsulta(Long id, ConsultaRequestDTO consultaRequestDTO) {
-        ConsultaEntity consulta = consultaRepository.findById(id).orElseThrow(() -> new RuntimeException("Consulta não encontrada"));
+        ConsultaEntity consulta = consultaRepository.findById(id).orElseThrow(() -> new ConsultaNaoEncontradaException("Consulta não encontrada"));
         consulta.setMotivoConsulta(consultaRequestDTO.getMotivoConsulta());
         consulta.setDataConsulta(consultaRequestDTO.getDataConsulta());
         consulta.setHorarioConsulta(consultaRequestDTO.getHorarioConsulta());
@@ -92,7 +93,7 @@ public class ConsultaService {
         consulta.setDosagemPrecaucoes(consultaRequestDTO.getDosagemPrecaucoes());
 
         PacienteEntity paciente = pacienteRepository.findById(consultaRequestDTO.getPacienteId())
-                .orElseThrow(() -> new RuntimeException("Paciente não encontrado"));
+                .orElseThrow(() -> new PacienteNaoEncontradoException("Paciente não encontrado"));
         consulta.setPaciente(paciente);
 
         ConsultaEntity updatedConsulta = consultaRepository.save(consulta);
@@ -100,7 +101,7 @@ public class ConsultaService {
     }
 
     public void deleteConsulta(Long id) {
-        ConsultaEntity consulta = consultaRepository.findById(id).orElseThrow(() -> new RuntimeException("Consulta não encontrada"));
+        ConsultaEntity consulta = consultaRepository.findById(id).orElseThrow(() -> new ConsultaNaoEncontradaException("Consulta não encontrada"));
         consultaRepository.delete(consulta);
     }
 

@@ -5,7 +5,8 @@ import br.com.senai.lab365.labmedical.dtos.exames.ExameRequestDTO;
 import br.com.senai.lab365.labmedical.dtos.exames.ExameResponseDTO;
 import br.com.senai.lab365.labmedical.entities.ExameEntity;
 import br.com.senai.lab365.labmedical.entities.PacienteEntity;
-import br.com.senai.lab365.labmedical.exceptions.exames.ResourceNotFoundException;
+import br.com.senai.lab365.labmedical.exceptions.exames.ExameNaoEncontradoException;
+import br.com.senai.lab365.labmedical.exceptions.paciente.PacienteNaoEncontradoException;
 import br.com.senai.lab365.labmedical.repositories.ExameRepository;
 import br.com.senai.lab365.labmedical.repositories.PacienteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,9 +18,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.security.core.GrantedAuthority;
 
-import java.util.List;
+
 import java.util.Optional;
-import java.util.stream.Collectors;
+
+
 @Service
 public class ExameService {
 
@@ -30,12 +32,12 @@ public class ExameService {
     private PacienteRepository pacienteRepository;
 
     @Autowired
-    private AuthService authService; // Injeção do AuthService
+    private AuthService authService;
 
     public ExameResponseDTO createExame(ExameRequestDTO exameRequestDTO) {
         Optional<PacienteEntity> pacienteOptional = pacienteRepository.findById(exameRequestDTO.getPacienteId());
         if (!pacienteOptional.isPresent()) {
-            throw new ResourceNotFoundException("Paciente não encontrado");
+            throw new PacienteNaoEncontradoException("Paciente não encontrado");
         }
         PacienteEntity paciente = pacienteOptional.get();
 
@@ -94,7 +96,7 @@ public class ExameService {
                     exameEntity.getPaciente().getId()
             );
         } else {
-            throw new ResourceNotFoundException("Exame não encontrado");
+            throw new ExameNaoEncontradoException("Exame não encontrado");
         }
     }
 
@@ -104,7 +106,7 @@ public class ExameService {
             ExameEntity exameEntity = exameEntityOptional.get();
             Optional<PacienteEntity> pacienteOptional = pacienteRepository.findById(exameRequestDTO.getPacienteId());
             if (!pacienteOptional.isPresent()) {
-                throw new ResourceNotFoundException("Paciente não encontrado");
+                throw new PacienteNaoEncontradoException("Paciente não encontrado");
             }
             PacienteEntity paciente = pacienteOptional.get();
 
@@ -129,7 +131,7 @@ public class ExameService {
                     updatedExame.getPaciente().getId()
             );
         } else {
-            throw new ResourceNotFoundException("Exame não encontrado");
+            throw new ExameNaoEncontradoException("Exame não encontrado");
         }
     }
 
@@ -151,7 +153,7 @@ public class ExameService {
         if (exameRepository.existsById(id)) {
             exameRepository.deleteById(id);
         } else {
-            throw new ResourceNotFoundException("Exame não encontrado");
+            throw new ExameNaoEncontradoException("Exame não encontrado");
         }
     }
 }

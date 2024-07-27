@@ -2,6 +2,7 @@ package br.com.senai.lab365.labmedical.controllers;
 
 
 import br.com.senai.lab365.labmedical.dtos.dashboard.DashboardDTO;
+import br.com.senai.lab365.labmedical.exceptions.responses.ApiResponseOK;
 import br.com.senai.lab365.labmedical.services.DashboardService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -19,12 +20,12 @@ public class DashboardController {
     @Autowired
     private DashboardService dashboardService;
 
-//    @Secured("ROLE_USER")
     @GetMapping
     @Operation(summary = "dashboard estatiticas")
-        @ApiResponse(responseCode = "200", description = "Dashboard estatiticas")
-    public ResponseEntity<DashboardDTO> getDashboard() {
+    @ApiResponse(responseCode = "200", description = "Dashboard estatiticas")
+    public ResponseEntity<ApiResponseOK<DashboardDTO>> getDashboard() {
         DashboardDTO dashboardDTO = dashboardService.getDashboardStatistics();
-        return ResponseEntity.ok(dashboardDTO);
+        ApiResponseOK<DashboardDTO> response = new ApiResponseOK<>("Dashboard estatiticas", dashboardDTO);
+        return ResponseEntity.ok(response);
     }
 }
