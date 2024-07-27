@@ -1,7 +1,6 @@
 package br.com.senai.lab365.labmedical.dtos.cadastros;
 
 import br.com.senai.lab365.labmedical.entities.Perfil;
-import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import java.time.LocalDate;
 
@@ -30,7 +29,7 @@ public class CadastroRequestDTO {
     @NotNull
     private Perfil perfil;
 
-    private Long id; // Add the id field
+    private Long id;
 
     public CadastroRequestDTO() {
     }

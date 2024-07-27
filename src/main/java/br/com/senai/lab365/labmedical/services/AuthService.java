@@ -49,7 +49,4 @@ public class AuthService {
         }
     }
 
-    public boolean isUserAuthenticated() {
-        return SecurityContextHolder.getContext().getAuthentication().isAuthenticated();
-    }
 }
