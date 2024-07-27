@@ -5,6 +5,7 @@ import br.com.senai.lab365.labmedical.services.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -29,13 +30,21 @@ public class SecurityConfig {
         http.csrf().disable()
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/usuarios/login").permitAll()
-                        .requestMatchers("/api/usuarios/cadastro").hasRole("ADMIN")
+                        .requestMatchers("/api/usuarios").hasRole("ADMIN")
                         .requestMatchers("/api/pacientes").hasAnyRole("ADMIN", "MEDICO")
-                        .requestMatchers("/api/pacientes/**").hasAnyRole("ADMIN", "MEDICO", "PACIENTE")
-                        .requestMatchers("/api/consultas").hasAnyRole("ADMIN", "MEDICO")
-                        .requestMatchers("/api/consultas/**").hasAnyRole("ADMIN", "MEDICO", "PACIENTE")
-                        .requestMatchers("/api/exames").hasAnyRole("ADMIN", "MEDICO")
-                        .requestMatchers("/api/exames/**").hasAnyRole("ADMIN", "MEDICO", "PACIENTE")
+                        .requestMatchers("/api/pacientes/{id}").hasAnyRole("ADMIN", "MEDICO", "PACIENTE")
+                        .requestMatchers(HttpMethod.POST, "/api/pacientes").hasAnyRole("ADMIN", "MEDICO")
+                        .requestMatchers(HttpMethod.PUT, "/api/pacientes/{id}").hasAnyRole("ADMIN", "MEDICO")
+                        .requestMatchers(HttpMethod.DELETE, "/api/pacientes/{id}").hasAnyRole("ADMIN", "MEDICO")
+                        .requestMatchers(HttpMethod.GET, "/api/pacientes").hasAnyRole("ADMIN", "MEDICO")
+                        .requestMatchers(HttpMethod.POST, "/api/consultas").hasAnyRole("ADMIN", "MEDICO")
+                        .requestMatchers(HttpMethod.GET, "/api/consultas/{id}").hasAnyRole("ADMIN", "MEDICO", "PACIENTE")
+                        .requestMatchers(HttpMethod.PUT, "/api/consultas/{id}").hasAnyRole("ADMIN", "MEDICO")
+                        .requestMatchers(HttpMethod.DELETE, "/api/consultas/{id}").hasAnyRole("ADMIN", "MEDICO")
+                        .requestMatchers(HttpMethod.POST, "/api/exames").hasAnyRole("ADMIN", "MEDICO")
+                        .requestMatchers(HttpMethod.GET, "/api/exames/{id}").hasAnyRole("ADMIN", "MEDICO", "PACIENTE")
+                        .requestMatchers(HttpMethod.PUT, "/api/exames/{id}").hasAnyRole("ADMIN", "MEDICO")
+                        .requestMatchers(HttpMethod.DELETE, "/api/exames/{id}").hasAnyRole("ADMIN", "MEDICO")
                         .requestMatchers("/api/pacientes/prontuarios").hasAnyRole("ADMIN", "MEDICO")
                         .requestMatchers("/api/pacientes/{id}/prontuarios").hasAnyRole("ADMIN", "MEDICO")
                         .requestMatchers("/api/dashboard").hasAnyRole("ADMIN", "MEDICO")

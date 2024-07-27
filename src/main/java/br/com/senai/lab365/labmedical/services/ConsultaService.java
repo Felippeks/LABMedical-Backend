@@ -8,7 +8,12 @@ import br.com.senai.lab365.labmedical.exceptions.exames.ResourceNotFoundExceptio
 import br.com.senai.lab365.labmedical.repositories.ConsultaRepository;
 import br.com.senai.lab365.labmedical.repositories.PacienteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -44,15 +49,22 @@ public class ConsultaService {
         return new ConsultaResponseDTO(savedConsulta.getId(), savedConsulta.getMotivoConsulta(), savedConsulta.getDataConsulta(), savedConsulta.getHorarioConsulta(), savedConsulta.getDescricaoProblema(), savedConsulta.getMedicacaoReceitada(), savedConsulta.getDosagemPrecaucoes(), savedConsulta.getPaciente().getId());
     }
 
-     public Optional<ConsultaResponseDTO> getConsultaById(Long id) {
-        Long pacienteId = authService.getPacienteAutenticadoId();
+    public Optional<ConsultaResponseDTO> getConsultaById(Long id) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        boolean isAdminOrMedico = authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .anyMatch(role -> role.equals("ROLE_ADMIN") || role.equals("ROLE_MEDICO"));
+
         Optional<ConsultaEntity> consultaEntityOptional = consultaRepository.findById(id);
 
         if (consultaEntityOptional.isPresent()) {
             ConsultaEntity consultaEntity = consultaEntityOptional.get();
 
-            if (!consultaEntity.getPaciente().getId().equals(pacienteId)) {
-                throw new AccessDeniedException("Você não tem permissão para acessar esta consulta");
+            if (!isAdminOrMedico) {
+                Long pacienteId = authService.getPacienteAutenticadoId();
+                if (!consultaEntity.getPaciente().getId().equals(pacienteId)) {
+                    throw new AccessDeniedException("Você não tem permissão para acessar esta consulta");
+                }
             }
 
             return Optional.of(new ConsultaResponseDTO(
@@ -96,8 +108,8 @@ public class ConsultaService {
         return consultaRepository.findByMotivoConsulta(motivoConsulta).stream().map(consulta -> new ConsultaResponseDTO(consulta.getId(), consulta.getMotivoConsulta(), consulta.getDataConsulta(), consulta.getHorarioConsulta(), consulta.getDescricaoProblema(), consulta.getMedicacaoReceitada(), consulta.getDosagemPrecaucoes(), consulta.getPaciente().getId())).collect(Collectors.toList());
     }
 
-    public List<ConsultaResponseDTO> getAllConsultas() {
-        return consultaRepository.findAll().stream()
+    public Page<ConsultaResponseDTO> getAllConsultas(Pageable pageable) {
+        return consultaRepository.findAll(pageable)
                 .map(consulta -> new ConsultaResponseDTO(
                         consulta.getId(),
                         consulta.getMotivoConsulta(),
@@ -106,7 +118,6 @@ public class ConsultaService {
                         consulta.getDescricaoProblema(),
                         consulta.getMedicacaoReceitada(),
                         consulta.getDosagemPrecaucoes(),
-                        consulta.getPaciente().getId()))
-                .collect(Collectors.toList());
+                        consulta.getPaciente().getId()));
     }
 }

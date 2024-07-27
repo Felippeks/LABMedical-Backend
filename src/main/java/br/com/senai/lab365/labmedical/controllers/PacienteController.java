@@ -102,9 +102,13 @@ public class PacienteController {
     public ResponseEntity<PacienteResponseDTO> buscarPacientePorId(@PathVariable Long id) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
-
         Optional<PacienteResponseDTO> paciente = pacienteService.buscarPacientePorIdEVerificarPermissao(id, username);
-        return paciente.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.status(HttpStatus.FORBIDDEN).build());
+
+        if (paciente.isPresent()) {
+            return ResponseEntity.ok(paciente.get());
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
     }
 
 
