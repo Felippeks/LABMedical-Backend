@@ -9,7 +9,10 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.Pageable;
 import java.util.List;
@@ -93,10 +96,15 @@ public class PacienteController {
             @ApiResponse(responseCode = "200", description = "Paciente encontrado",
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = PacienteResponseDTO.class))),
-            @ApiResponse(responseCode = "404", description = "Paciente não encontrado")})
+            @ApiResponse(responseCode = "404", description = "Paciente não encontrado"),
+            @ApiResponse(responseCode = "403", description = "Acesso negado")
+    })
     public ResponseEntity<PacienteResponseDTO> buscarPacientePorId(@PathVariable Long id) {
-        Optional<PacienteResponseDTO> paciente = pacienteService.buscarPacientePorId(id);
-        return paciente.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+
+        Optional<PacienteResponseDTO> paciente = pacienteService.buscarPacientePorIdEVerificarPermissao(id, username);
+        return paciente.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.status(HttpStatus.FORBIDDEN).build());
     }
 
 

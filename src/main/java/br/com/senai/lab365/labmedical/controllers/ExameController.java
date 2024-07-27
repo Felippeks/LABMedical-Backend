@@ -2,12 +2,14 @@ package br.com.senai.lab365.labmedical.controllers;
 
 import br.com.senai.lab365.labmedical.dtos.exames.ExameRequestDTO;
 import br.com.senai.lab365.labmedical.dtos.exames.ExameResponseDTO;
+import br.com.senai.lab365.labmedical.exceptions.exames.ResourceNotFoundException;
 import br.com.senai.lab365.labmedical.services.ExameService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -30,11 +32,17 @@ public class ExameController {
 
     @GetMapping("/{id}")
     @Operation(summary = "Recupera um exame", description = "Recupera um exame com base no ID fornecido", tags = {"exames"})
-        @ApiResponse(responseCode = "200", description = "Exame recuperado com sucesso")
-        @ApiResponse(responseCode = "404", description = "Exame não encontrado")
+    @ApiResponse(responseCode = "200", description = "Exame recuperado com sucesso")
+    @ApiResponse(responseCode = "404", description = "Exame não encontrado")
     public ResponseEntity<ExameResponseDTO> getExameById(@PathVariable Long id) {
-        ExameResponseDTO exameResponseDTO = exameService.getExameById(id);
-        return new ResponseEntity<>(exameResponseDTO, HttpStatus.OK);
+        try {
+            ExameResponseDTO exameResponseDTO = exameService.getExameById(id);
+            return new ResponseEntity<>(exameResponseDTO, HttpStatus.OK);
+        } catch (AccessDeniedException e) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        } catch (ResourceNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 
     @PutMapping("/{id}")

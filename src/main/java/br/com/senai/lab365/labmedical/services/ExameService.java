@@ -1,5 +1,6 @@
 package br.com.senai.lab365.labmedical.services;
 
+
 import br.com.senai.lab365.labmedical.dtos.exames.ExameRequestDTO;
 import br.com.senai.lab365.labmedical.dtos.exames.ExameResponseDTO;
 import br.com.senai.lab365.labmedical.entities.ExameEntity;
@@ -8,12 +9,12 @@ import br.com.senai.lab365.labmedical.exceptions.exames.ResourceNotFoundExceptio
 import br.com.senai.lab365.labmedical.repositories.ExameRepository;
 import br.com.senai.lab365.labmedical.repositories.PacienteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
 @Service
 public class ExameService {
 
@@ -22,6 +23,9 @@ public class ExameService {
 
     @Autowired
     private PacienteRepository pacienteRepository;
+
+    @Autowired
+    private AuthService authService; // Injeção do AuthService
 
     public ExameResponseDTO createExame(ExameRequestDTO exameRequestDTO) {
         Optional<PacienteEntity> pacienteOptional = pacienteRepository.findById(exameRequestDTO.getPacienteId());
@@ -56,9 +60,16 @@ public class ExameService {
     }
 
     public ExameResponseDTO getExameById(Long id) {
+        Long pacienteId = authService.getPacienteAutenticadoId();
         Optional<ExameEntity> exameEntityOptional = exameRepository.findById(id);
+
         if (exameEntityOptional.isPresent()) {
             ExameEntity exameEntity = exameEntityOptional.get();
+
+            if (!exameEntity.getPaciente().getId().equals(pacienteId)) {
+                throw new AccessDeniedException("Você não tem permissão para acessar este exame");
+            }
+
             return new ExameResponseDTO(
                     exameEntity.getId(),
                     exameEntity.getNomeExame(),
@@ -109,6 +120,7 @@ public class ExameService {
             throw new ResourceNotFoundException("Exame não encontrado");
         }
     }
+
     public List<ExameResponseDTO> getAllExames() {
         List<ExameEntity> exames = exameRepository.findAll();
         return exames.stream().map(exame -> new ExameResponseDTO(
