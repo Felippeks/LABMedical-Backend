@@ -10,8 +10,9 @@ Labmedical is a backend REST API developed in Java, utilizing the Spring Boot fr
 - **Security**: Implements Spring Security for access control.
 - **Data Transfer**: Utilizes DTOs for request and response handling.
 - **Database**: Uses PostgreSQL for data storage, which can be set up via Docker or direct connection.
-- **Version Control**: Code is managed on GitHub, adhering to the GitFlow pattern with main, features, and optional release branches. Commits are expected to be short and concise.
-- **Task Management**: Tasks are organized using Trello, with a public board following the Kanban structure (backlog, todo, doing, blocked, review, done).
+- **Documentation**: Generates API documentation using SpringDoc OpenAPI.
+- **Automated Tests**:  Utilizes Cypress for automated end-to-end testing.
+
 
 # Application Roadmap
 
@@ -36,7 +37,9 @@ The application will include the following endpoints, secured with JWT tokens vi
 - Java 21
 - Maven
 - PostgreSQL
-- Docker (optional for database setup)
+- Docker 
+- Node.js and npm (for Cypress)
+
 
 # Running the Application
 
@@ -51,6 +54,18 @@ The following admin credentials are pre-loaded in the database for testing:
 
 ### Email: admin@example.com
 ### Password: admin
+
+
+# Cypress Automated Testing
+
+## Installing Cypress
+- Navigate to the project root directory.
+- Install Cypress using npm: `npm install cypress --save-dev`.
+
+## Running Cypress Tests
+- Start the application.
+- Run Cypress using npm: `npx cypress run`.
+- Test files are organized into separate folders for each endpoint. There is a master test file, ```00_Run_All_Tests.spec.cy.js```, that runs all test scenarios.
 
 # Project Structure
 
