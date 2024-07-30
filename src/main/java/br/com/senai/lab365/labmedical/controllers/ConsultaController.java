@@ -47,11 +47,13 @@ public class ConsultaController {
         try {
             Optional<ConsultaResponseDTO> consulta = consultaService.getConsultaById(id);
             return consulta.map(c -> new ResponseEntity<>(new ApiResponseOK<>("Consulta recuperada com sucesso", c), HttpStatus.OK))
-                    .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+                    .orElseGet(() -> new ResponseEntity<>(new ApiResponseOK<>("Consulta não encontrada", null), HttpStatus.NOT_FOUND));
         } catch (AccessDeniedException e) {
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+            ApiResponseOK<ConsultaResponseDTO> response = new ApiResponseOK<>("Acesso Negado: Você não tem as permissões necessárias para acessar este recurso", null);
+            return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
         } catch (ConsultaNaoEncontradaException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            ApiResponseOK<ConsultaResponseDTO> response = new ApiResponseOK<>("Consulta não encontrada", null);
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
         }
     }
 
@@ -66,7 +68,8 @@ public class ConsultaController {
             ApiResponseOK<ConsultaResponseDTO> response = new ApiResponseOK<>("Consulta atualizada com sucesso", updatedConsulta);
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (ConsultaNaoEncontradaException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            ApiResponseOK<ConsultaResponseDTO> response = new ApiResponseOK<>("Consulta não encontrada", null);
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
         }
     }
 
@@ -80,6 +83,7 @@ public class ConsultaController {
             ApiResponseOK<String> response = new ApiResponseOK<>("Consulta deletada com sucesso", null);
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (ConsultaNaoEncontradaException e) {
+            ApiResponseOK<String> response = new ApiResponseOK<>("Consulta não encontrada", null);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }

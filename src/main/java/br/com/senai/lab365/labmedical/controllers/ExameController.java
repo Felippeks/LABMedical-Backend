@@ -3,8 +3,8 @@ package br.com.senai.lab365.labmedical.controllers;
 import br.com.senai.lab365.labmedical.dtos.exames.ExameRequestDTO;
 import br.com.senai.lab365.labmedical.dtos.exames.ExameResponseDTO;
 import br.com.senai.lab365.labmedical.exceptions.exames.ExameNaoEncontradoException;
-import br.com.senai.lab365.labmedical.exceptions.responses.ApiResponseOK;
 import br.com.senai.lab365.labmedical.services.ExameService;
+import br.com.senai.lab365.labmedical.exceptions.responses.ApiResponseOK;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +15,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.*;
-
 
 @RestController
 @RequestMapping("/api/exames")
@@ -44,9 +43,11 @@ public class ExameController {
             ApiResponseOK<ExameResponseDTO> response = new ApiResponseOK<>("Exame recuperado com sucesso", exameResponseDTO);
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (AccessDeniedException e) {
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+            ApiResponseOK<ExameResponseDTO> response = new ApiResponseOK<>("Acesso Negado: Você não tem as permissões necessárias para acessar este recurso", null);
+            return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
         } catch (ExameNaoEncontradoException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            ApiResponseOK<ExameResponseDTO> response = new ApiResponseOK<>("Exame não encontrado", null);
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
         }
     }
 
@@ -60,7 +61,8 @@ public class ExameController {
             ApiResponseOK<ExameResponseDTO> response = new ApiResponseOK<>("Exame atualizado com sucesso", updatedExame);
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (ExameNaoEncontradoException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            ApiResponseOK<ExameResponseDTO> response = new ApiResponseOK<>("Exame não encontrado", null);
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
         }
     }
 
@@ -74,7 +76,8 @@ public class ExameController {
             ApiResponseOK<String> response = new ApiResponseOK<>("Exame deletado com sucesso", null);
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (ExameNaoEncontradoException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            ApiResponseOK<String> response = new ApiResponseOK<>("Exame não encontrado", null);
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
         }
     }
 
