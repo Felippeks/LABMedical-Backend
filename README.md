@@ -65,7 +65,7 @@ The following admin credentials are pre-loaded in the database for testing:
 ## Running Cypress Tests
 - Start the application.
 - Run Cypress using npm: `npx cypress run`.
-- Test files are organized into separate folders for each endpoint. There is a master test file, ```00_Run_All_Tests.spec.cy.js```, that runs all test scenarios.
+- Test files are organized into separate folders for each endpoint.
 
 # Project Structure
 

@@ -1,14 +1,15 @@
 const { getToken } = require('../../support/tokens');
 
-describe('Create and Delete Patient', () => {
+describe('Criar e Atualizar Paciente', () => {
     let newPatient;
     let adminToken;
     let createdPatientId;
 
+    // Antes de todos os testes, obtenha os dados do paciente e o token de administrador
     before(() => {
         cy.task('getPatientData').then((patient) => {
             newPatient = patient;
-            cy.log(`Retrieved patient data: ${JSON.stringify(newPatient)}`);
+            cy.log(`Dados do paciente recuperados: ${JSON.stringify(newPatient)}`);
             expect(newPatient).to.not.be.undefined;
         });
 
@@ -18,7 +19,8 @@ describe('Create and Delete Patient', () => {
         });
     });
 
-    it('should create and delete a patient', () => {
+    // Teste para criar e atualizar um paciente
+    it('deve criar e atualizar um paciente', () => {
         const formattedCpf = `${newPatient.cpf.slice(0, 3)}.${newPatient.cpf.slice(3, 6)}.${newPatient.cpf.slice(6, 9)}-${newPatient.cpf.slice(9, 11)}`;
 
         const patientData = {
@@ -52,7 +54,7 @@ describe('Create and Delete Patient', () => {
             }
         };
 
-        // Create patient
+        // Cria paciente
         cy.request({
             method: 'POST',
             url: 'http://localhost:8081/api/pacientes',
@@ -63,28 +65,39 @@ describe('Create and Delete Patient', () => {
             failOnStatusCode: false
         }).then((response) => {
             if (response.status === 400 && response.body.includes('CPF já cadastrado')) {
-                cy.log('CPF already registered, skipping creation.');
+                cy.log('CPF já cadastrado, pulando criação.');
                 createdPatientId = newPatient.id;
             } else {
                 expect(response.status).to.eq(201);
                 createdPatientId = response.body.id;
-                cy.log(`Patient created with ID: ${createdPatientId}`);
+                cy.log(`Paciente criado com ID: ${createdPatientId}`);
             }
 
-            // Delete patient
+            // Atualiza paciente
+            const updatedPatientData = {
+                ...patientData,
+                numeroConvenio: `${Math.floor(Math.random() * 1000000000)}`,
+                endereco: {
+                    ...patientData.endereco,
+                    pontoDeReferencia: "Proximo a casa azul"
+                }
+            };
+
+            // Envia uma requisição PUT para atualizar um paciente
             cy.request({
-                method: 'DELETE',
+                method: 'PUT',
                 url: `http://localhost:8081/api/pacientes/${createdPatientId}`,
                 headers: {
                     'Authorization': `Bearer ${adminToken}`
                 },
+                body: updatedPatientData,
                 failOnStatusCode: false
-            }).then((deleteResponse) => {
-                if (deleteResponse.status === 404) {
-                    cy.log('Patient not found, cannot delete.');
+            }).then((updateResponse) => {
+                if (updateResponse.status === 404) {
+                    cy.log('Paciente não encontrado, não é possível atualizar.');
                 } else {
-                    expect(deleteResponse.status).to.eq(200);
-                    cy.log(`Patient deleted with ID: ${createdPatientId}`);
+                    expect(updateResponse.status).to.eq(200);
+                    cy.log(`Paciente atualizado com ID: ${createdPatientId}`);
                 }
             });
         });

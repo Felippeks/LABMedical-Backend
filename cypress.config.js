@@ -1,5 +1,6 @@
 const { defineConfig } = require('cypress');
 const tokens = require('./cypress/support/tokens');
+const { Client } = require('pg');
 
 let patientData = {};
 let patientId = {};
@@ -35,9 +36,24 @@ module.exports = defineConfig({
         getPatientId() {
           console.log(`Retrieved patient ID: ${patientId}`);
           return patientId;
+        },
+        async queryDatabase(query) {
+          const client = new Client({
+            host: 'localhost',
+            user: 'admin',
+            password: '1q2w3E@!',
+            database: 'LabMedical',
+            port: '5455'
+
+          });
+
+          await client.connect();
+          const res = await client.query(query);
+          await client.end();
+          return res.rows;
         }
       });
     },
-    specPattern: 'cypress/e2e/Pacientes/*.cy.js'
+    specPattern: 'cypress/e2e/{00_Login,01_Cadastro,02_Pacientes}/*.cy.js'
   }
 });
