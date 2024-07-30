@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -115,7 +116,7 @@ public class PacienteController {
             ApiResponseOK<PacienteResponseDTO> response = new ApiResponseOK<>("Paciente encontrado", paciente.get());
             return ResponseEntity.ok(response);
         } else {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            throw new AccessDeniedException("Acesso Negado: Você não tem as permissões necessárias para acessar este recurso.");
         }
     }
 
