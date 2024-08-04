@@ -94,8 +94,7 @@ public class PacienteController {
             ApiResponseOK<String> response = new ApiResponseOK<>("Paciente excluído com sucesso", null);
             return ResponseEntity.ok(response);
         } else {
-            ApiResponseOK<String> response = new ApiResponseOK<>("Paciente não encontrado", null);
-            return ResponseEntity.status(404).body(response);
+            throw new PacienteNaoEncontradoException("Paciente não encontrado");
         }
     }
 
@@ -115,8 +114,10 @@ public class PacienteController {
         if (paciente.isPresent()) {
             ApiResponseOK<PacienteResponseDTO> response = new ApiResponseOK<>("Paciente encontrado", paciente.get());
             return ResponseEntity.ok(response);
-        } else {
+        } else if (!pacienteService.verificarPermissao(id, username)) {
             throw new AccessDeniedException("Acesso Negado: Você não tem as permissões necessárias para acessar este recurso.");
+        } else {
+            throw new PacienteNaoEncontradoException("Paciente não encontrado");
         }
     }
 
