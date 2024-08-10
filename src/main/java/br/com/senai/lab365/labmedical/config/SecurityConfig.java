@@ -46,10 +46,12 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/api/pacientes/{id}").hasAnyRole("ADMIN", "MEDICO")
                         .requestMatchers(HttpMethod.GET, "/api/pacientes").hasAnyRole("ADMIN", "MEDICO")
                         .requestMatchers(HttpMethod.POST, "/api/consultas").hasAnyRole("ADMIN", "MEDICO")
+                        .requestMatchers(HttpMethod.GET, "/api/consultas").hasAnyRole("ADMIN", "MEDICO")
                         .requestMatchers(HttpMethod.GET, "/api/consultas/{id}").hasAnyRole("ADMIN", "MEDICO", "PACIENTE")
                         .requestMatchers(HttpMethod.PUT, "/api/consultas/{id}").hasAnyRole("ADMIN", "MEDICO")
                         .requestMatchers(HttpMethod.DELETE, "/api/consultas/{id}").hasAnyRole("ADMIN", "MEDICO")
                         .requestMatchers(HttpMethod.POST, "/api/exames").hasAnyRole("ADMIN", "MEDICO")
+                        .requestMatchers(HttpMethod.GET, "/api/exames").hasAnyRole("ADMIN", "MEDICO")
                         .requestMatchers(HttpMethod.GET, "/api/exames/{id}").hasAnyRole("ADMIN", "MEDICO", "PACIENTE")
                         .requestMatchers(HttpMethod.PUT, "/api/exames/{id}").hasAnyRole("ADMIN", "MEDICO")
                         .requestMatchers(HttpMethod.DELETE, "/api/exames/{id}").hasAnyRole("ADMIN", "MEDICO")
@@ -69,6 +71,7 @@ public class SecurityConfig {
 
         return http.build();
     }
+
 
     @Autowired
     public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
