@@ -206,6 +206,20 @@ public class PacienteService {
         return Optional.empty();
     }
 
+    public boolean verificarPermissao(Long pacienteId, String username) {
+        UsuarioEntity usuario = usuarioRepository.findByEmail(username)
+                .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado"));
+        Optional<PacienteEntity> paciente = pacienteRepository.findById(pacienteId);
+
+        if (paciente.isPresent()) {
+            PacienteEntity pacienteEntity = paciente.get();
+            return usuario.getPerfil().equals(Perfil.ADMIN) ||
+                    usuario.getPerfil().equals(Perfil.MEDICO) ||
+                    pacienteEntity.getUsuario().getId().equals(usuario.getId());
+        }
+        return false;
+    }
+
     private PacienteEntity convertToEntity(PacienteRequestDTO dto) {
         PacienteEntity entity = new PacienteEntity();
         entity.setNomeCompleto(dto.getNomeCompleto());

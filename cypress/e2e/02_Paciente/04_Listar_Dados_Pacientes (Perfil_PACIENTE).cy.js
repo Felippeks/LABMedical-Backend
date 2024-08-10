@@ -1,14 +1,31 @@
 const { setToken, getToken } = require('../../support/tokens');
 
-// Teste para autenticar usuários e gerenciar pacientes
+
 describe('Autenticação de Usuário e Gerenciamento de Pacientes', () => {
     const baseUrl = 'http://localhost:8081/api/usuarios/login';
+    let patientToken;
     let adminToken;
     let createdPatientId;
 
-    // Antes de todos os testes, logar e pegar o token do administrador
+
     before(() => {
-        // Logar e pegar o token do medico
+        // Logar e pegar o token do paciente
+        cy.request({
+            method: 'POST',
+            url: baseUrl,
+            body: {
+                email: 'paciente@example.com',
+                password: 'paciente'
+            }
+        }).then((response) => {
+            expect(response.status).to.eq(200);
+            expect(response.body).to.have.property('token');
+            patientToken = response.body.token;
+            cy.log(`Token para PACIENTE: ${patientToken}`);
+            cy.task('setToken', { role: 'PACIENTE', token: patientToken });
+        });
+
+
         cy.request({
             method: 'POST',
             url: baseUrl,
@@ -23,9 +40,8 @@ describe('Autenticação de Usuário e Gerenciamento de Pacientes', () => {
             cy.log(`Token para ADMIN: ${adminToken}`);
             cy.task('setToken', { role: 'ADMIN', token: adminToken });
         });
+    });
 
-
-    // Antes de todos os testes, criar um novo paciente
     it('deve criar um novo paciente usando os dados armazenados e salvar o ID do paciente', () => {
         cy.task('getPatientData').then((newPatient) => {
             const patientData = {
@@ -59,7 +75,6 @@ describe('Autenticação de Usuário e Gerenciamento de Pacientes', () => {
                 }
             };
 
-            // Verificar se o paciente já existe se não criar um novo, com permissão de admin
             cy.task('queryDatabase', `SELECT id FROM pacientes WHERE cpf = '${patientData.cpf}'`).then((result) => {
                 if (result.length > 0) {
                     createdPatientId = result[0].id;
@@ -86,29 +101,29 @@ describe('Autenticação de Usuário e Gerenciamento de Pacientes', () => {
         });
     });
 
-    // Teste de acesso como medico
-    it('deve retornar 200 ao acessar /api/pacientes como admin', () => {
-        cy.task('getToken', 'ADMIN').then((token) => {
+    it('deve retornar 403 ao acessar /api/pacientes sem autorização', () => {
+        cy.task('getToken', 'PACIENTE').then((token) => {
             cy.request({
                 method: 'GET',
                 url: 'http://localhost:8081/api/pacientes',
                 headers: {
                     'Authorization': `Bearer ${token}`
                 },
+                failOnStatusCode: false
             }).then((response) => {
-                expect(response.status).to.eq(200);
+                expect(response.status).to.eq(403);
             });
         });
     });
 
-    it('deve retornar os dados do paciente ao acessar /api/paciente/id com o token do admin', () => {
+    it('deve retornar os dados do paciente ao acessar /api/paciente/id com o token do paciente', () => {
         cy.task('queryDatabase', `SELECT id FROM pacientes WHERE cpf = '000.000.000-01'`).then((result) => {
             const createdPatientId = result[0].id;
             cy.request({
                 method: 'GET',
                 url: `http://localhost:8081/api/pacientes/${createdPatientId}`,
                 headers: {
-                    'Authorization': `Bearer ${adminToken}`
+                    'Authorization': `Bearer ${patientToken}`
                 }
             }).then((response) => {
                 expect(response.status).to.eq(200);
@@ -116,5 +131,16 @@ describe('Autenticação de Usuário e Gerenciamento de Pacientes', () => {
         });
     });
 
-});
+    it('deve retornar 403 ao acessar /api/paciente/id diferente com o token do paciente', () => {
+        cy.request({
+            method: 'GET',
+            url: `http://localhost:8081/api/pacientes/234`,
+            headers: {
+                'Authorization': `Bearer ${patientToken}`
+            },
+            failOnStatusCode: false
+        }).then((response) => {
+            expect(response.status).to.eq(403);
+        });
+    });
 });

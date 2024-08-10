@@ -1,11 +1,9 @@
 const { setToken, getToken } = require('../../support/tokens');
 
-// Teste para autenticar usuários e listar pacientes
 describe('Listar Pacientes', () => {
     const baseUrl = 'http://localhost:8081/api/usuarios/login';
     let adminToken;
 
-    // Antes de todos os testes, logar e pegar o token do administrador
     before(() => {
         cy.request({
             method: 'POST',
