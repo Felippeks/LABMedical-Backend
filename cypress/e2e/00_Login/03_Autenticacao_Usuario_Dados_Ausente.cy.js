@@ -1,10 +1,7 @@
 const { setToken } = require('../../support/tokens');
 
-// Teste para autenticar usuários com dados ausentes
 describe('Autenticação de Usuário com Dados Ausentes', () => {
     const baseUrl = 'http://localhost:8081/api/usuarios/login';
-
-    // Define os usuários e suas credenciais
     const users = [
         { email: 'admin@example.com', password: '', role: 'ADMIN' },
         { email: 'medico@example.com', password: '', role: 'MEDICO' },

@@ -1,7 +1,9 @@
 package br.com.senai.lab365.labmedical.util;
 
 import br.com.senai.lab365.labmedical.entities.UsuarioEntity;
+import br.com.senai.lab365.labmedical.exceptions.jwt.JwtTokenExpiredException;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Value;
@@ -91,7 +93,11 @@ public class JwtUtil {
     }
 
     public String getEmailFromToken(String token) {
-        return getClaimFromToken(token, Claims::getSubject);
+        try {
+            return getClaimFromToken(token, Claims::getSubject);
+        } catch (ExpiredJwtException ex) {
+            throw new JwtTokenExpiredException("Token expirado");
+        }
     }
 
     public Date getExpirationDateFromToken(String token) {

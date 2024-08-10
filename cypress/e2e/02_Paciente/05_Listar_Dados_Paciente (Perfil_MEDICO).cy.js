@@ -1,48 +1,28 @@
 const { setToken, getToken } = require('../../support/tokens');
 
-// Teste para autenticar usuários e gerenciar pacientes
 describe('Autenticação de Usuário e Gerenciamento de Pacientes', () => {
     const baseUrl = 'http://localhost:8081/api/usuarios/login';
-    let patientToken;
-    let adminToken;
+    let medicoToken;
     let createdPatientId;
 
-    // Antes de todos os testes, logar e pegar os tokens do paciente e do administrador
     before(() => {
-        // Logar e pegar o token do paciente
+        // Logar e pegar o token do medico
         cy.request({
             method: 'POST',
             url: baseUrl,
             body: {
-                email: 'paciente@example.com',
-                password: 'paciente'
+                email: 'medico@example.com',
+                password: 'medico'
             }
         }).then((response) => {
             expect(response.status).to.eq(200);
             expect(response.body).to.have.property('token');
-            patientToken = response.body.token;
-            cy.log(`Token para PACIENTE: ${patientToken}`);
-            cy.task('setToken', { role: 'PACIENTE', token: patientToken });
+            medicoToken = response.body.token;
+            cy.log(`Token para MEDICO: ${medicoToken}`);
+            cy.task('setToken', { role: 'MEDICO', token: medicoToken });
         });
 
-        // Logar e pegar o token do administrador
-        cy.request({
-            method: 'POST',
-            url: baseUrl,
-            body: {
-                email: 'admin@example.com',
-                password: 'admin'
-            }
-        }).then((response) => {
-            expect(response.status).to.eq(200);
-            expect(response.body).to.have.property('token');
-            adminToken = response.body.token;
-            cy.log(`Token para ADMIN: ${adminToken}`);
-            cy.task('setToken', { role: 'ADMIN', token: adminToken });
-        });
-    });
 
-    // Antes de todos os testes, criar um novo paciente
     it('deve criar um novo paciente usando os dados armazenados e salvar o ID do paciente', () => {
         cy.task('getPatientData').then((newPatient) => {
             const patientData = {
@@ -76,19 +56,18 @@ describe('Autenticação de Usuário e Gerenciamento de Pacientes', () => {
                 }
             };
 
-            // Verificar se o paciente já existe
             cy.task('queryDatabase', `SELECT id FROM pacientes WHERE cpf = '${patientData.cpf}'`).then((result) => {
                 if (result.length > 0) {
                     createdPatientId = result[0].id;
                     cy.log(`CPF já cadastrado, usando ID de paciente existente: ${createdPatientId}`);
                     cy.task('savePatientId', createdPatientId);
                 } else {
-                    cy.task('getToken', 'ADMIN').then((adminToken) => {
+                    cy.task('getToken', 'MEDICO').then((medicoToken) => {
                         cy.request({
                             method: 'POST',
                             url: 'http://localhost:8081/api/pacientes',
                             headers: {
-                                'Authorization': `Bearer ${adminToken}`
+                                'Authorization': `Bearer ${medicoToken}`
                             },
                             body: patientData
                         }).then((response) => {
@@ -103,31 +82,28 @@ describe('Autenticação de Usuário e Gerenciamento de Pacientes', () => {
         });
     });
 
-    // Teste de acesso não autorizado
-    it('deve retornar 403 ao acessar /api/pacientes sem autorização', () => {
-        cy.task('getToken', 'PACIENTE').then((token) => {
+    it('deve retornar 200 ao acessar /api/pacientes como medico', () => {
+        cy.task('getToken', 'MEDICO').then((token) => {
             cy.request({
                 method: 'GET',
                 url: 'http://localhost:8081/api/pacientes',
                 headers: {
                     'Authorization': `Bearer ${token}`
                 },
-                failOnStatusCode: false
             }).then((response) => {
-                expect(response.status).to.eq(403);
+                expect(response.status).to.eq(200);
             });
         });
     });
 
-    // Teste de acesso autorizado
-    it('deve retornar os dados do paciente ao acessar /api/paciente/id com o token do paciente', () => {
+    it('deve retornar os dados do paciente ao acessar /api/paciente/id com o token do medico', () => {
         cy.task('queryDatabase', `SELECT id FROM pacientes WHERE cpf = '000.000.000-01'`).then((result) => {
             const createdPatientId = result[0].id;
             cy.request({
                 method: 'GET',
                 url: `http://localhost:8081/api/pacientes/${createdPatientId}`,
                 headers: {
-                    'Authorization': `Bearer ${patientToken}`
+                    'Authorization': `Bearer ${medicoToken}`
                 }
             }).then((response) => {
                 expect(response.status).to.eq(200);
@@ -135,17 +111,5 @@ describe('Autenticação de Usuário e Gerenciamento de Pacientes', () => {
         });
     });
 
-    // Teste de acesso não autorizado
-    it('deve retornar 403 ao acessar /api/paciente/id diferente com o token do paciente', () => {
-        cy.request({
-            method: 'GET',
-            url: `http://localhost:8081/api/pacientes/234`,
-            headers: {
-                'Authorization': `Bearer ${patientToken}`
-            },
-            failOnStatusCode: false
-        }).then((response) => {
-            expect(response.status).to.eq(403);
-        });
-    });
+});
 });
