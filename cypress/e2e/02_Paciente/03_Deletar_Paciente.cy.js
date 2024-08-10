@@ -1,10 +1,10 @@
 const { getToken } = require('../../support/tokens');
 
-describe('Criar Paciente', () => {
+describe('Criar e Deletar Paciente', () => {
     let newPatient;
     let adminToken;
+    let createdPatientId;
 
-    // Antes de todos os testes, obtenha os dados do paciente e o token de administrador
     before(() => {
         cy.task('getPatientData').then((patient) => {
             newPatient = patient;
@@ -18,8 +18,7 @@ describe('Criar Paciente', () => {
         });
     });
 
-    // Teste para criar um novo paciente
-    it('deve criar um novo paciente usando os dados armazenados', () => {
+    it('deve criar e deletar um paciente', () => {
         const formattedCpf = `${newPatient.cpf.slice(0, 3)}.${newPatient.cpf.slice(3, 6)}.${newPatient.cpf.slice(6, 9)}-${newPatient.cpf.slice(9, 11)}`;
 
         const patientData = {
@@ -53,19 +52,38 @@ describe('Criar Paciente', () => {
             }
         };
 
-        // Envia uma requisição POST para criar um novo paciente
         cy.request({
             method: 'POST',
             url: 'http://localhost:8081/api/pacientes',
             headers: {
                 'Authorization': `Bearer ${adminToken}`
             },
-            body: patientData
+            body: patientData,
+            failOnStatusCode: false
         }).then((response) => {
-            expect(response.status).to.eq(201);
-            const createdPatientId = response.body.id;
-            cy.task('savePatientId', createdPatientId).then(() => {
+            if (response.status === 400 && response.body.includes('CPF já cadastrado')) {
+                cy.log('CPF já cadastrado, pulando criação.');
+                createdPatientId = newPatient.id;
+            } else {
+                expect(response.status).to.eq(201);
+                createdPatientId = response.body.id;
                 cy.log(`Paciente criado com ID: ${createdPatientId}`);
+            }
+
+            cy.request({
+                method: 'DELETE',
+                url: `http://localhost:8081/api/pacientes/${createdPatientId}`,
+                headers: {
+                    'Authorization': `Bearer ${adminToken}`
+                },
+                failOnStatusCode: false
+            }).then((deleteResponse) => {
+                if (deleteResponse.status === 404) {
+                    cy.log('Paciente não encontrado, não é possível deletar.');
+                } else {
+                    expect(deleteResponse.status).to.eq(200);
+                    cy.log(`Paciente deletado com ID: ${createdPatientId}`);
+                }
             });
         });
     });

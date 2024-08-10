@@ -4,7 +4,6 @@ describe('Obter Token', () => {
     let newPatient;
     let adminToken;
 
-    // Antes de todos os testes, obtenha os dados do paciente e o token de administrador
     before(() => {
         cy.task('getPatientData').then((patient) => {
             newPatient = patient;
@@ -18,7 +17,6 @@ describe('Obter Token', () => {
         });
     });
 
-    // Teste para criar um novo paciente
     it('deve tentar criar um novo paciente usando os dados ausentes', () => {
         const patientData = {
             nomeCompleto: "",
@@ -51,7 +49,6 @@ describe('Obter Token', () => {
             }
         };
 
-        // Envia uma requisição POST para tentar criar um novo paciente
         cy.request({
             method: 'POST',
             url: 'http://localhost:8081/api/pacientes',

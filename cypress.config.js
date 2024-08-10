@@ -4,6 +4,10 @@ const { Client } = require('pg');
 
 let patientData = {};
 let patientId = {};
+let medicoData = {};
+let medicoId = {};
+let adminData = {};
+let adminId = {};
 
 module.exports = defineConfig({
   e2e: {
@@ -37,6 +41,38 @@ module.exports = defineConfig({
           console.log(`Retrieved patient ID: ${patientId}`);
           return patientId;
         },
+        setMedicoData(data) {
+          medicoData = data;
+          return null;
+        },
+        getMedicoData() {
+          return medicoData;
+        },
+        saveMedicoId(id) {
+          medicoId = id;
+          console.log(`Saved medico ID: ${medicoId}`);
+          return null;
+        },
+        getMedicoId() {
+          console.log(`Retrieved medico ID: ${medicoId}`);
+          return medicoId;
+        },
+        setAdminData(data) {
+          adminData = data;
+          return null;
+        },
+        getAdminData() {
+          return adminData;
+        },
+        saveAdminId(id) {
+          adminId = id;
+          console.log(`Saved admin ID: ${adminId}`);
+          return null;
+        },
+        getAdminId() {
+          console.log(`Retrieved admin ID: ${adminId}`);
+          return adminId;
+        },
         async queryDatabase(query) {
           const client = new Client({
             host: 'localhost',
@@ -44,16 +80,21 @@ module.exports = defineConfig({
             password: '1q2w3E@!',
             database: 'LabMedical',
             port: '5455'
-
           });
 
-          await client.connect();
-          const res = await client.query(query);
-          await client.end();
-          return res.rows;
+          try {
+            await client.connect();
+            const res = await client.query(query);
+            return res.rows;
+          } catch (error) {
+            console.error('Database query error:', error);
+            throw error;
+          } finally {
+            await client.end();
+          }
         }
       });
     },
-    specPattern: 'cypress/e2e/{00_Login,01_Cadastro,02_Pacientes}/*.cy.js'
+    specPattern: 'cypress/e2e/{00_Login,01_Cadastro,02_Paciente,03_Consulta}/*.cy.js'
   }
 });

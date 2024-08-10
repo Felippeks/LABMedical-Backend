@@ -1,11 +1,10 @@
 const { getToken } = require('../../support/tokens');
 
-describe('Criar e Atualizar Paciente', () => {
+describe('Criar Paciente', () => {
     let newPatient;
     let adminToken;
-    let createdPatientId;
 
-    // Antes de todos os testes, obtenha os dados do paciente e o token de administrador
+
     before(() => {
         cy.task('getPatientData').then((patient) => {
             newPatient = patient;
@@ -19,8 +18,7 @@ describe('Criar e Atualizar Paciente', () => {
         });
     });
 
-    // Teste para criar e atualizar um paciente
-    it('deve criar e atualizar um paciente', () => {
+    it('deve criar um novo paciente usando os dados armazenados', () => {
         const formattedCpf = `${newPatient.cpf.slice(0, 3)}.${newPatient.cpf.slice(3, 6)}.${newPatient.cpf.slice(6, 9)}-${newPatient.cpf.slice(9, 11)}`;
 
         const patientData = {
@@ -54,51 +52,18 @@ describe('Criar e Atualizar Paciente', () => {
             }
         };
 
-        // Cria paciente
         cy.request({
             method: 'POST',
             url: 'http://localhost:8081/api/pacientes',
             headers: {
                 'Authorization': `Bearer ${adminToken}`
             },
-            body: patientData,
-            failOnStatusCode: false
+            body: patientData
         }).then((response) => {
-            if (response.status === 400 && response.body.includes('CPF já cadastrado')) {
-                cy.log('CPF já cadastrado, pulando criação.');
-                createdPatientId = newPatient.id;
-            } else {
-                expect(response.status).to.eq(201);
-                createdPatientId = response.body.id;
+            expect(response.status).to.eq(201);
+            const createdPatientId = response.body.id;
+            cy.task('savePatientId', createdPatientId).then(() => {
                 cy.log(`Paciente criado com ID: ${createdPatientId}`);
-            }
-
-            // Atualiza paciente
-            const updatedPatientData = {
-                ...patientData,
-                numeroConvenio: `${Math.floor(Math.random() * 1000000000)}`,
-                endereco: {
-                    ...patientData.endereco,
-                    pontoDeReferencia: "Proximo a casa azul"
-                }
-            };
-
-            // Envia uma requisição PUT para atualizar um paciente
-            cy.request({
-                method: 'PUT',
-                url: `http://localhost:8081/api/pacientes/${createdPatientId}`,
-                headers: {
-                    'Authorization': `Bearer ${adminToken}`
-                },
-                body: updatedPatientData,
-                failOnStatusCode: false
-            }).then((updateResponse) => {
-                if (updateResponse.status === 404) {
-                    cy.log('Paciente não encontrado, não é possível atualizar.');
-                } else {
-                    expect(updateResponse.status).to.eq(200);
-                    cy.log(`Paciente atualizado com ID: ${createdPatientId}`);
-                }
             });
         });
     });
