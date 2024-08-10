@@ -61,6 +61,29 @@ The following admin credentials are pre-loaded in the database for testing:
 ## Installing Cypress
 - Navigate to the project root directory.
 - Install Cypress using npm: `npm install cypress --save-dev`.
+- Install Faker.js using npm: `npm install @faker-js/faker`.
+
+## Configuring Cypress
+- Edit the cypress.config.json file to set the base URL for the application.
+- Add or edit the following code to the cypress.json file:
+```
+async queryDatabase(query) {
+          const client = new Client({
+            host: 'localhost',
+            user: 'user bd',
+            password: 'password bd',
+            database: 'database name',
+            port: 'port number',
+
+          });
+
+          await client.connect();
+          const res = await client.query(query);
+          await client.end();
+          return res.rows;
+        }
+```
+
 
 ## Running Cypress Tests
 - Start the application.

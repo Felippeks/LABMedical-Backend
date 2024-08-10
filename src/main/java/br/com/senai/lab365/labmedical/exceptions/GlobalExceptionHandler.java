@@ -21,8 +21,8 @@ import java.util.Map;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(PacienteNaoEncontradoException.class)
-    public ResponseEntity<?> handlePacienteNaoEncontrado(PacienteNaoEncontradoException ex) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+    public ResponseEntity<String> handlePacienteNaoEncontrado(PacienteNaoEncontradoException ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(CpfJaCadastradoException.class)

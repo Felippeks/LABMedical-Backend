@@ -1,11 +1,7 @@
 const { setToken } = require('../../support/tokens');
 
-
-// Teste para autenticar usuários e obter tokens
 describe('Autenticação de Usuário', () => {
     const baseUrl = 'http://localhost:8081/api/usuarios/login';
-
-    // Define os usuários e suas credenciais
     const users = [
         { email: 'admin@example.com', password: 'admin', role: 'ADMIN' },
         { email: 'medico@example.com', password: 'medico', role: 'MEDICO' },

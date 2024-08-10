@@ -3,7 +3,6 @@ const { getToken } = require('../../support/tokens');
 describe('Registro de Usuário Paciente', () => {
     let adminToken;
 
-    // Antes de todos os testes, obtenha o token de administrador
     before(() => {
         cy.task('getToken', 'ADMIN').then((token) => {
             adminToken = token;
@@ -11,7 +10,7 @@ describe('Registro de Usuário Paciente', () => {
         });
     });
 
-    // Teste para registrar um novo paciente
+
     it('deve registrar um novo paciente usando o token de administrador', () => {
         const randomSuffix = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
         const newPatient = {
@@ -23,7 +22,6 @@ describe('Registro de Usuário Paciente', () => {
             perfil: 'PACIENTE'
         };
 
-        // Envia uma requisição POST para registrar um novo paciente
         cy.request({
             method: 'POST',
             url: 'http://localhost:8081/api/usuarios/cadastro',
@@ -37,7 +35,6 @@ describe('Registro de Usuário Paciente', () => {
             const newPatientId = response.body.id;
             cy.log(`Novo ID de paciente: ${newPatientId}`);
 
-            // Salva os dados do novo paciente
             cy.task('setPatientData', { ...newPatient, id: newPatientId });
         });
     });
