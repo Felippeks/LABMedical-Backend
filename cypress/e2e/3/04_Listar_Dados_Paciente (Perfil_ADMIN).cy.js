@@ -6,7 +6,6 @@ describe('Autenticação de Usuário e Gerenciamento de Pacientes', () => {
     let createdPatientId;
 
     before(() => {
-        // Logar e pegar o token do medico
         cy.request({
             method: 'POST',
             url: baseUrl,
