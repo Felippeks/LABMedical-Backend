@@ -3,6 +3,7 @@ package br.com.senai.lab365.labmedical.controllers;
 import br.com.senai.lab365.labmedical.dtos.paciente.PacienteRequestDTO;
 import br.com.senai.lab365.labmedical.dtos.paciente.PacienteResponseDTO;
 import br.com.senai.lab365.labmedical.dtos.prontuarios.ProntuarioResponseDTO;
+import br.com.senai.lab365.labmedical.entities.PacienteEntity;
 import br.com.senai.lab365.labmedical.exceptions.paciente.PacienteNaoEncontradoException;
 import br.com.senai.lab365.labmedical.exceptions.responses.ApiResponseOK;
 import br.com.senai.lab365.labmedical.services.PacienteService;
@@ -109,16 +110,19 @@ public class PacienteController {
     public ResponseEntity<ApiResponseOK<PacienteResponseDTO>> buscarPacientePorId(@PathVariable Long id) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
-        Optional<PacienteResponseDTO> paciente = pacienteService.buscarPacientePorIdEVerificarPermissao(id, username);
 
-        if (paciente.isPresent()) {
-            ApiResponseOK<PacienteResponseDTO> response = new ApiResponseOK<>("Paciente encontrado", paciente.get());
-            return ResponseEntity.ok(response);
-        } else if (!pacienteService.verificarPermissao(id, username)) {
-            throw new AccessDeniedException("Acesso Negado: Você não tem as permissões necessárias para acessar este recurso.");
-        } else {
+        Optional<PacienteEntity> pacienteEntity = pacienteService.buscarPacientePorId(id);
+        if (!pacienteEntity.isPresent()) {
             throw new PacienteNaoEncontradoException("Paciente não encontrado");
         }
+
+        if (!pacienteService.verificarPermissao(id, username)) {
+            throw new AccessDeniedException("Acesso Negado: Você não tem as permissões necessárias para acessar este recurso.");
+        }
+
+        PacienteResponseDTO paciente = pacienteService.convertToResponseDTO(pacienteEntity.get());
+        ApiResponseOK<PacienteResponseDTO> response = new ApiResponseOK<>("Paciente encontrado", paciente);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/prontuarios")
