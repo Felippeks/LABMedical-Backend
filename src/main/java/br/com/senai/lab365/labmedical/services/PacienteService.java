@@ -206,6 +206,10 @@ public class PacienteService {
         return Optional.empty();
     }
 
+    public Optional<PacienteEntity> buscarPacientePorId(Long id) {
+        return pacienteRepository.findById(id);
+    }
+
     public boolean verificarPermissao(Long pacienteId, String username) {
         UsuarioEntity usuario = usuarioRepository.findByEmail(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado"));
@@ -243,7 +247,7 @@ public class PacienteService {
     }
 
 
-    private PacienteResponseDTO convertToResponseDTO(PacienteEntity entity) {
+    public PacienteResponseDTO convertToResponseDTO(PacienteEntity entity) {
         PacienteResponseDTO dto = new PacienteResponseDTO();
         dto.setId(entity.getId());
         dto.setNomeCompleto(entity.getNomeCompleto());
