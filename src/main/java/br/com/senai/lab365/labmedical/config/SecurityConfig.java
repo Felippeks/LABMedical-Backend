@@ -39,6 +39,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/usuarios/login").permitAll()
                         .requestMatchers("/api/usuarios").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/pacientes/prontuarios").hasAnyRole("ADMIN", "MEDICO")
+                        .requestMatchers(HttpMethod.GET, "/api/pacientes/{id}/prontuarios").hasAnyRole("ADMIN", "MEDICO")
                         .requestMatchers("/api/pacientes").hasAnyRole("ADMIN", "MEDICO")
                         .requestMatchers("/api/pacientes/{id}").hasAnyRole("ADMIN", "MEDICO", "PACIENTE")
                         .requestMatchers(HttpMethod.POST, "/api/pacientes").hasAnyRole("ADMIN", "MEDICO")
@@ -55,8 +57,6 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/exames/{id}").hasAnyRole("ADMIN", "MEDICO", "PACIENTE")
                         .requestMatchers(HttpMethod.PUT, "/api/exames/{id}").hasAnyRole("ADMIN", "MEDICO")
                         .requestMatchers(HttpMethod.DELETE, "/api/exames/{id}").hasAnyRole("ADMIN", "MEDICO")
-                        .requestMatchers("/api/pacientes/prontuarios").hasAnyRole("ADMIN", "MEDICO")
-                        .requestMatchers("/api/pacientes/{id}/prontuarios").hasAnyRole("ADMIN", "MEDICO")
                         .requestMatchers("/api/dashboard").hasAnyRole("ADMIN", "MEDICO")
                         .requestMatchers("/swagger-ui/**", "/api-docs/**", "/swagger-ui.html", "/webjars/**", "/swagger-resources/**").permitAll()
                         .anyRequest().authenticated()
@@ -71,7 +71,6 @@ public class SecurityConfig {
 
         return http.build();
     }
-
 
     @Autowired
     public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {

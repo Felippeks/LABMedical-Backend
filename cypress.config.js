@@ -95,6 +95,6 @@ module.exports = defineConfig({
         }
       });
     },
-    specPattern: 'cypress/e2e/{00_Login,01_Cadastro,02_Paciente,03_Consulta}/*.cy.js'
+    specPattern: 'cypress/e2e/{1,2,3,4,5,6,7}/*.cy.js'
   }
 });
