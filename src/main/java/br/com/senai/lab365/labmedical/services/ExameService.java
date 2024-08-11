@@ -5,16 +5,23 @@ import br.com.senai.lab365.labmedical.dtos.exames.ExameRequestDTO;
 import br.com.senai.lab365.labmedical.dtos.exames.ExameResponseDTO;
 import br.com.senai.lab365.labmedical.entities.ExameEntity;
 import br.com.senai.lab365.labmedical.entities.PacienteEntity;
-import br.com.senai.lab365.labmedical.exceptions.exames.ResourceNotFoundException;
+import br.com.senai.lab365.labmedical.exceptions.exames.ExameNaoEncontradoException;
+import br.com.senai.lab365.labmedical.exceptions.paciente.PacienteNaoEncontradoException;
 import br.com.senai.lab365.labmedical.repositories.ExameRepository;
 import br.com.senai.lab365.labmedical.repositories.PacienteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.security.core.GrantedAuthority;
 
-import java.util.List;
+
 import java.util.Optional;
-import java.util.stream.Collectors;
+
+
 @Service
 public class ExameService {
 
@@ -25,12 +32,12 @@ public class ExameService {
     private PacienteRepository pacienteRepository;
 
     @Autowired
-    private AuthService authService; // Injeção do AuthService
+    private AuthService authService;
 
     public ExameResponseDTO createExame(ExameRequestDTO exameRequestDTO) {
         Optional<PacienteEntity> pacienteOptional = pacienteRepository.findById(exameRequestDTO.getPacienteId());
         if (!pacienteOptional.isPresent()) {
-            throw new ResourceNotFoundException("Paciente não encontrado");
+            throw new PacienteNaoEncontradoException("Paciente não encontrado");
         }
         PacienteEntity paciente = pacienteOptional.get();
 
@@ -60,14 +67,21 @@ public class ExameService {
     }
 
     public ExameResponseDTO getExameById(Long id) {
-        Long pacienteId = authService.getPacienteAutenticadoId();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        boolean isAdminOrMedico = authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .anyMatch(role -> role.equals("ROLE_ADMIN") || role.equals("ROLE_MEDICO"));
+
         Optional<ExameEntity> exameEntityOptional = exameRepository.findById(id);
 
         if (exameEntityOptional.isPresent()) {
             ExameEntity exameEntity = exameEntityOptional.get();
 
-            if (!exameEntity.getPaciente().getId().equals(pacienteId)) {
-                throw new AccessDeniedException("Você não tem permissão para acessar este exame");
+            if (!isAdminOrMedico) {
+                Long pacienteId = authService.getPacienteAutenticadoId();
+                if (!exameEntity.getPaciente().getId().equals(pacienteId)) {
+                    throw new AccessDeniedException("Você não tem permissão para acessar este exame");
+                }
             }
 
             return new ExameResponseDTO(
@@ -82,7 +96,7 @@ public class ExameService {
                     exameEntity.getPaciente().getId()
             );
         } else {
-            throw new ResourceNotFoundException("Exame não encontrado");
+            throw new ExameNaoEncontradoException("Exame não encontrado");
         }
     }
 
@@ -92,7 +106,7 @@ public class ExameService {
             ExameEntity exameEntity = exameEntityOptional.get();
             Optional<PacienteEntity> pacienteOptional = pacienteRepository.findById(exameRequestDTO.getPacienteId());
             if (!pacienteOptional.isPresent()) {
-                throw new ResourceNotFoundException("Paciente não encontrado");
+                throw new PacienteNaoEncontradoException("Paciente não encontrado");
             }
             PacienteEntity paciente = pacienteOptional.get();
 
@@ -117,30 +131,29 @@ public class ExameService {
                     updatedExame.getPaciente().getId()
             );
         } else {
-            throw new ResourceNotFoundException("Exame não encontrado");
+            throw new ExameNaoEncontradoException("Exame não encontrado");
         }
     }
 
-    public List<ExameResponseDTO> getAllExames() {
-        List<ExameEntity> exames = exameRepository.findAll();
-        return exames.stream().map(exame -> new ExameResponseDTO(
-                exame.getId(),
-                exame.getNomeExame(),
-                exame.getDataExame(),
-                exame.getHorarioExame(),
-                exame.getTipoExame(),
-                exame.getLaboratorio(),
-                exame.getUrlDocumento(),
-                exame.getResultados(),
-                exame.getPaciente().getId()
-        )).collect(Collectors.toList());
+    public Page<ExameResponseDTO> getAllExames(Pageable pageable) {
+        return exameRepository.findAll(pageable)
+                .map(exame -> new ExameResponseDTO(
+                        exame.getId(),
+                        exame.getNomeExame(),
+                        exame.getDataExame(),
+                        exame.getHorarioExame(),
+                        exame.getTipoExame(),
+                        exame.getLaboratorio(),
+                        exame.getUrlDocumento(),
+                        exame.getResultados(),
+                        exame.getPaciente().getId()));
     }
 
     public void deleteExame(Long id) {
         if (exameRepository.existsById(id)) {
             exameRepository.deleteById(id);
         } else {
-            throw new ResourceNotFoundException("Exame não encontrado");
+            throw new ExameNaoEncontradoException("Exame não encontrado");
         }
     }
 }

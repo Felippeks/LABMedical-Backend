@@ -1,25 +1,26 @@
 # Labmedical Project
 
-## Overview
+# Overview
 Labmedical is a backend REST API developed in Java, utilizing the Spring Boot framework. This project aims to provide a comprehensive system for managing patient records, consultations, and medical examinations.
 
-## Application Requirements
+# Application Requirements
 
 - **Language and Framework**: The application is developed in Java, using Spring Boot.
 - **Architecture**: Follows the MVC pattern with Controller, Service, and Repository layers.
 - **Security**: Implements Spring Security for access control.
 - **Data Transfer**: Utilizes DTOs for request and response handling.
 - **Database**: Uses PostgreSQL for data storage, which can be set up via Docker or direct connection.
-- **Version Control**: Code is managed on GitHub, adhering to the GitFlow pattern with main, features, and optional release branches. Commits are expected to be short and concise.
-- **Task Management**: Tasks are organized using Trello, with a public board following the Kanban structure (backlog, todo, doing, blocked, review, done).
+- **Documentation**: Generates API documentation using SpringDoc OpenAPI.
+- **Automated Tests**:  Utilizes Cypress for automated end-to-end testing.
 
-## Application Roadmap
 
-### System Format
+# Application Roadmap
+
+# System Format
 
 The application will include the following endpoints, secured with JWT tokens via Spring Security, except for the login endpoint which is unrestricted.
 
-#### Endpoints
+# Endpoints
 
 - **Login Endpoint**
 - **Registration Endpoint**
@@ -29,16 +30,18 @@ The application will include the following endpoints, secured with JWT tokens vi
 - **Medical Record Entity Endpoints**
 - **Dashboard Endpoint**
 
-## Development Setup
+# Development Setup
 
-### Prerequisites
+# Prerequisites
 
 - Java 21
 - Maven
 - PostgreSQL
-- Docker (optional for database setup)
+- Docker 
+- Node.js and npm (for Cypress)
 
-### Running the Application
+
+# Running the Application
 
 1. Clone the repository from GitHub.
 - git clone https://github.com/Felippeks/LABMedical-Backend.git
@@ -46,13 +49,48 @@ The application will include the following endpoints, secured with JWT tokens vi
 3. Configure application properties for database access.
 4. Run the application using Maven: `mvn spring-boot:run`.
 
-### Admin Credentials
+# Admin Credentials
 The following admin credentials are pre-loaded in the database for testing:
 
-- Email: admin@example.com
-- Password: admin
+### Email: admin@example.com
+### Password: admin
 
-## Project Structure
+
+# Cypress Automated Testing
+
+## Installing Cypress
+- Navigate to the project root directory.
+- Install Cypress using npm: `npm install cypress --save-dev`.
+- Install Faker.js using npm: `npm install @faker-js/faker`.
+
+## Configuring Cypress
+- Edit the cypress.config.json file to set the base URL for the application.
+- Add or edit the following code to the cypress.json file:
+```
+async queryDatabase(query) {
+          const client = new Client({
+            host: 'localhost',
+            user: 'user bd',
+            password: 'password bd',
+            database: 'database name',
+            port: 'port number',
+
+          });
+
+          await client.connect();
+          const res = await client.query(query);
+          await client.end();
+          return res.rows;
+        }
+```
+
+
+## Running Cypress Tests
+- Start the application.
+- Run Cypress using npm: `npx cypress run`.
+- Test files are organized into separate folders for each endpoint.
+
+# Project Structure
 
 Below is the structure of the Labmedical project:
 
@@ -123,14 +161,20 @@ Below is the structure of the Labmedical project:
 |   |   |                       |   |   GlobalExceptionHandler.java
 |   |   |                       |   |
 |   |   |                       |   +---consulta
+|   |   |                       |   |       ConsultaNaoEncontradaException.java
+|   |   |                       |   |
 |   |   |                       |   +---exames
 |   |   |                       |   |       BadRequestException.java
+|   |   |                       |   |       ExameNaoEncontradoException.java
 |   |   |                       |   |       ResourceNotFoundException.java
 |   |   |                       |   |
-|   |   |                       |   \---paciente
-|   |   |                       |           CampoObrigatorioException.java
-|   |   |                       |           CpfJaCadastradoException.java
-|   |   |                       |           PacienteNaoEncontradoException.java
+|   |   |                       |   +---paciente
+|   |   |                       |   |       CampoObrigatorioException.java
+|   |   |                       |   |       CpfJaCadastradoException.java
+|   |   |                       |   |       PacienteNaoEncontradoException.java
+|   |   |                       |   |
+|   |   |                       |   \---responses
+|   |   |                       |           ApiResponseOK.java
 |   |   |                       |
 |   |   |                       +---repositories
 |   |   |                       |       ConsultaRepository.java
